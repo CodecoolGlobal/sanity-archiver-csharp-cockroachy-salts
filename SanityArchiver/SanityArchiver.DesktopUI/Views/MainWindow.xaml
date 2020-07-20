@@ -1,12 +1,27 @@
-﻿<Window x:Class="SanityArchiver.DesktopUI.Views.MainWindow"
+﻿<Window x:Name="Form" x:Class="SanityArchiver.DesktopUI.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SanityArchiver.DesktopUI"
+        xmlns:local="clr-namespace:SanityArchiver.DesktopUI.Views"
         mc:Ignorable="d"
         Title="Sanity Archiver" Height="450" Width="800">
-    <Grid>
-        
+    <Grid x:Name="MainWindow1" Loaded="Window_Loaded">
+        <Grid.Resources>
+            <HierarchicalDataTemplate DataType="{x:Type local:Directory}" ItemsSource ="{Binding Directories}">
+                <TextBlock Text="{Binding Path=Name}" MouseDown="NameCol_mousedown"/>
+            </HierarchicalDataTemplate>
+        </Grid.Resources>
+        <TreeView Margin="12,12,0,12" Name="treeView1" HorizontalAlignment="Left" Width="204" >
+            <TreeViewItem ItemsSource="{Binding Directories}" Header="Choose directory"/>
+        </TreeView>
+        <DataGrid x:Name="FilesDataGrid" AutoGenerateColumns="False" Margin="234,12,10.286,11.714">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Header=""></DataGridCheckBoxColumn>
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding FileName}" Header="Name" Width="200"/>
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Created}" Header="Created" Width="200"/>
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Size}" Header="Size(kb)" Width="200"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
