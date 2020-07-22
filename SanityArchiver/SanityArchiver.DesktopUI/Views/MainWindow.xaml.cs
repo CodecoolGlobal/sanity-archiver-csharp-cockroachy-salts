@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.IO;
+using System.IO.Compression;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
-using Microsoft.Win32;
 
 namespace SanityArchiver.DesktopUI.Views
 {
@@ -16,8 +15,6 @@ namespace SanityArchiver.DesktopUI.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        private object buttonClicked;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -28,6 +25,18 @@ namespace SanityArchiver.DesktopUI.Views
 
         private MainWindowViewModel _vm;
 
+        private static string path = "C:/Users/Tamás/Desktop/Projektek";
+
+        private List<File> AllFiles = new List<File>();
+
+        private List<File> FilesToCompress = new List<File>();
+
+        private List<File> FilesToEncrypt = new List<File>();
+
+        private List<File> FilesToDecrypt = new List<File>();
+
+        private Directory dir = new Directory();
+
         public MainWindowViewModel VM
         {
             set
@@ -36,15 +45,24 @@ namespace SanityArchiver.DesktopUI.Views
                 this.DataContext = _vm;
             }
         }
-
+        /// <summary>
+        /// When the Main Window is loaded it loads up "VM" with a List of Directories from the path(uses the recurseDir func)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var d = new Directory() {Name = "Projektek"};
-            recurseDir("C:/Users/Tamás/Desktop/Projektek", ref d);
+            dir = new Directory() { Name = "Projektek" };
+            recurseDir(path, ref dir);
 
-            VM = new MainWindowViewModel(new List<Directory>() {d});
+            VM = new MainWindowViewModel(new List<Directory>() { dir });
         }
 
+        /// <summary>
+        /// Recursively look for folders, subfolders, and files
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="dir"></param>
         private void recurseDir(string path, ref Directory dir)
         {
             var files = System.IO.Directory.GetFiles(path);
@@ -54,21 +72,27 @@ namespace SanityArchiver.DesktopUI.Views
 
             for (int i = 0; i < files.Length; i++)
             {
+                
                 var fi = new FileInfo(files[i]);
-                dir.Files.Add(new File()
+
+                var file = new File()
                 {
                     FileName = System.IO.Path.GetFileName(files[i]),
                     DirectoryPath = System.IO.Path.GetDirectoryName(files[i]),
                     Size = fi.Length,
                     Created = fi.CreationTime,
-                    Extension = System.IO.Path.GetExtension(files[i])
-                });
+                    IsChecked = false,
+                    Extension = System.IO.Path.GetExtension(files[i]),
+                };
+
+                dir.Files.Add(file);
+                AllFiles.Add(file);
 
             }
 
             for (int i = 0; i < dirs.Length; i++)
             {
-                var d = new Directory() {Name = dirs[i].Substring(dirs[i].LastIndexOf("\\") + 1)};
+                var d = new Directory() { Name = dirs[i].Substring(dirs[i].LastIndexOf("\\") + 1) };
                 recurseDir(dirs[i], ref d);
                 dir.Directories.Add(d);
 
@@ -76,19 +100,173 @@ namespace SanityArchiver.DesktopUI.Views
 
         }
 
+        /// <summary>
+        /// Controls the browsing trough the directory tree
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
         private void NameCol_mousedown(object sender, MouseButtonEventArgs e)
         {
-            var tb = (TextBlock) e.OriginalSource;
+            var tb = (TextBlock)e.OriginalSource;
             var dataCxtx = tb.DataContext;
-            var dataSource =(Directory) dataCxtx;
+            var dataSource = (Directory)dataCxtx;
 
             ShowFilesInGrid(dataSource.Files);
-            
+
         }
+        /// <summary>
+        /// Refreshes MainWindow when any file manipulation has been made.
+        /// </summary>
+        public void RefreshBrowser()
+        {
+            MainWindow NewMainWindow = new MainWindow();
+        }
+
+        /// <summary>
+        /// Fills the DataGrid with the files from the selected Directory
+        /// </summary>
+        /// <param name="Files"></param>
 
         private void ShowFilesInGrid(List<File> Files)
         {
             FilesDataGrid.ItemsSource = Files;
+        }
+
+        private void CompressButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+            foreach (var file in AllFiles)
+            {
+                if (file.IsChecked)
+                {
+                    FilesToCompress.Add(file);
+                }
+            }
+            OpenCompressWindows();
+        }
+
+        private void OpenCompressWindows()
+        {
+            CompressPopUp.Visibility = Visibility.Visible;
+            
+        }
+
+        private void CompressTheFiles(List<File> files)
+        {
+            using (ZipArchive zip = ZipFile.Open(CompressName.Text+".zip", ZipArchiveMode.Create))
+            {
+                foreach (var file in files)
+                {
+                    zip.CreateEntryFromFile(file.FullPath, file.FileName);
+                }
+
+                Close();
+            }
+
+            string SourceLocation = "C:/Users/Tamás/source/repos/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" + "/" + CompressName.Text + ".zip";
+            string TargetLocation = files[0].DirectoryPath + "/" + CompressName.Text + ".zip";
+
+            System.IO.File.Move(SourceLocation, TargetLocation);
+
+            CompressPopUp.Visibility = Visibility.Hidden;
+            
+
+        }
+        
+        private void ZipButton_Click(object sender, RoutedEventArgs e)
+        {
+            CompressTheFiles(FilesToCompress);
+            RefreshBrowser();
+            CompressPopUp.Visibility = Visibility.Hidden;
+            FilesToCompress = new List<File>();
+            ClearCheckingOnFiles();
+        }
+
+        private void CompressCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            CompressPopUp.Visibility = Visibility.Hidden;
+        }
+
+        private void Encrypt(object sender, RoutedEventArgs e)
+        {
+            foreach (var file in AllFiles)
+            {
+                if (file.IsChecked)
+                {
+                    if (file.Extension == ".txt")
+                    {
+                        FilesToEncrypt.Add(file);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Not a txt file");
+                    }
+                }
+            }
+            EncryptFiles();
+            ClearCheckingOnFiles();
+        }
+
+        private void EncryptFiles()
+        {
+            foreach (var file in FilesToEncrypt)
+            {
+                System.IO.File.Encrypt(file.FullPath);
+                ChangeFileExtension(FilesToEncrypt, ".ENC");
+                FilesToEncrypt = new List<File>();
+            }
+            ClearCheckingOnFiles();
+        }
+
+        private void DecryptFiles(List<File> files)
+        {
+            foreach (var file in files)
+            {
+                try
+                {
+                    System.IO.File.Decrypt(file.FullPath);
+                    ChangeFileExtension(files, ".txt");
+                } catch (FileNotFoundException)
+                {
+                    continue;
+                }
+            }
+            ClearCheckingOnFiles();
+        }
+
+        private void ClearCheckingOnFiles()
+        {
+            foreach (var file in AllFiles)
+            {
+                file.IsChecked = false;
+            }
+        }
+
+        private void ChangeFileExtension(List<File> filesToEncrypt, string Extension)
+        {
+            foreach (var file in filesToEncrypt)
+            {
+                Console.WriteLine(file.FullPath);
+                System.IO.File.Move(file.FullPath, Path.ChangeExtension(file.FullPath, Extension));
+            }
+        }
+
+        private void DecryptButton_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var file in AllFiles)
+            {
+                if (file.IsChecked)
+                {
+                    if (file.Extension == ".ENC")
+                    {
+                        FilesToDecrypt.Add(file);
+                    }
+                }
+            }
+
+            DecryptFiles(FilesToDecrypt);
+
         }
     }
 
@@ -131,7 +309,7 @@ namespace SanityArchiver.DesktopUI.Views
 
     }
     /// <summary>
-    /// Directory
+    /// Directory class
     /// </summary>
     public class Directory
     {
@@ -175,10 +353,10 @@ namespace SanityArchiver.DesktopUI.Views
             return Name;
         }
     }
-    
+
 
     /// <summary>
-    /// 
+    /// File class
     /// </summary>
     public class File
     {
@@ -186,6 +364,8 @@ namespace SanityArchiver.DesktopUI.Views
         public string FileName { get; set; }
         public string Extension { get; set; }
         public double Size { get; set; }
+
+        public bool IsChecked { get; set; }
 
         public DateTime Created { get; set; }
         public string FullPath => System.IO.Path.Combine(DirectoryPath, FileName);
