@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,7 +12,7 @@ namespace SanityArchiver.DesktopUI.Views
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -26,21 +24,24 @@ namespace SanityArchiver.DesktopUI.Views
 
         private MainWindowViewModel _vm;
 
-        private static string path = "C:/Users/Tamás/Desktop/Projektek";
+        private const string Path = "C:/Users/Tamás/Desktop/Projektek";
 
-        private List<File> AllFiles = new List<File>();
+        private readonly List<File> _allFiles = new List<File>();
 
-        private List<File> FilesToCompress = new List<File>();
+        private List<File> _filesToCompress = new List<File>();
 
-        private List<File> FilesToEncrypt = new List<File>();
+        private List<File> _filesToEncrypt = new List<File>();
 
-        private List<File> FilesToDecrypt = new List<File>();
+        private readonly List<File> _filesToDecrypt = new List<File>();
 
-        private File SelectedFile;
+        private File _selectedFile;
 
-        private Directory dir = new Directory();
+        private Directory _dir = new Directory();
 
-        public MainWindowViewModel VM
+        /// <summary>
+        /// We need this for the Folder Tree
+        /// </summary>
+        public MainWindowViewModel Vm
         {
             set
             {
@@ -55,10 +56,10 @@ namespace SanityArchiver.DesktopUI.Views
         /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            dir = new Directory() { Name = "Projektek" };
-            recurseDir(path, ref dir);
+            _dir = new Directory() { Name = "Projektek" };
+            RecurseDir(Path, ref _dir);
 
-            VM = new MainWindowViewModel(new List<Directory>() { dir });
+            Vm = new MainWindowViewModel(new List<Directory>() { _dir });
         }
 
         /// <summary>
@@ -66,40 +67,37 @@ namespace SanityArchiver.DesktopUI.Views
         /// </summary>
         /// <param name="path"></param>
         /// <param name="dir"></param>
-        private void recurseDir(string path, ref Directory dir)
+        private void RecurseDir(string path, ref Directory dir)
         {
             var files = System.IO.Directory.GetFiles(path);
             var dirs = System.IO.Directory.GetDirectories(path);
 
             dir.Name = path.Substring(path.LastIndexOf("\\", StringComparison.Ordinal) + 1);
 
-            for (int i = 0; i < files.Length; i++)
+            foreach (var fileInFiles in files)
             {
-                
-                var fi = new FileInfo(files[i]);
+                var fi = new FileInfo(fileInFiles);
 
                 var file = new File()
                 {
-                    FileName = System.IO.Path.GetFileName(files[i]),
-                    DirectoryPath = System.IO.Path.GetDirectoryName(files[i]),
+                    FileName = System.IO.Path.GetFileName(fileInFiles),
+                    DirectoryPath = System.IO.Path.GetDirectoryName(fileInFiles),
                     Size = fi.Length,
                     Created = fi.CreationTime,
                     IsChecked = false,
                     IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden),
-                    Extension = System.IO.Path.GetExtension(files[i]),
+                    Extension = System.IO.Path.GetExtension(fileInFiles),
                 };
 
                 dir.Files.Add(file);
-                AllFiles.Add(file);
-
+                _allFiles.Add(file);
             }
 
-            for (int i = 0; i < dirs.Length; i++)
+            foreach (var directory in dirs)
             {
-                var d = new Directory() { Name = dirs[i].Substring(dirs[i].LastIndexOf("\\") + 1) };
-                recurseDir(dirs[i], ref d);
+                var d = new Directory() { Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1) };
+                RecurseDir(directory, ref d);
                 dir.Directories.Add(d);
-
             }
 
         }
@@ -113,8 +111,8 @@ namespace SanityArchiver.DesktopUI.Views
         private void NameCol_mousedown(object sender, MouseButtonEventArgs e)
         {
             var tb = (TextBlock)e.OriginalSource;
-            var dataCxtx = tb.DataContext;
-            var dataSource = (Directory)dataCxtx;
+            var dataObject = tb.DataContext;
+            var dataSource = (Directory)dataObject;
 
             ShowFilesInGrid(dataSource.Files);
 
@@ -124,27 +122,27 @@ namespace SanityArchiver.DesktopUI.Views
         /// </summary>
         public void RefreshBrowser()
         {
-            MainWindow NewMainWindow = new MainWindow();
+            new MainWindow();
         }
 
         /// <summary>
         /// Fills the DataGrid with the files from the selected Directory
         /// </summary>
-        /// <param name="Files"></param>
+        /// <param name="files"></param>
 
-        private void ShowFilesInGrid(List<File> Files)
+        private void ShowFilesInGrid(IEnumerable<File> files)
         {
-            FilesDataGrid.ItemsSource = Files;
+            FilesDataGrid.ItemsSource = files;
         }
 
         private void CompressButton_Click(object sender, RoutedEventArgs e)
         {
             
-            foreach (var file in AllFiles)
+            foreach (var file in _allFiles)
             {
                 if (file.IsChecked)
                 {
-                    FilesToCompress.Add(file);
+                    _filesToCompress.Add(file);
                 }
             }
             OpenCompressWindows();
@@ -156,9 +154,9 @@ namespace SanityArchiver.DesktopUI.Views
             
         }
 
-        private void CompressTheFiles(List<File> files)
+        private void CompressTheFiles(IReadOnlyList<File> files)
         {
-            using (ZipArchive zip = ZipFile.Open(CompressName.Text+".zip", ZipArchiveMode.Create))
+            using (var zip = ZipFile.Open(CompressName.Text+".zip", ZipArchiveMode.Create))
             {
                 foreach (var file in files)
                 {
@@ -168,10 +166,10 @@ namespace SanityArchiver.DesktopUI.Views
                 Close();
             }
 
-            string SourceLocation = "C:/Users/Tamás/source/repos/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" + "/" + CompressName.Text + ".zip";
-            string TargetLocation = files[0].DirectoryPath + "/" + CompressName.Text + ".zip";
+            string sourceLocation = "C:/Users/Tamás/source/repos/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" + "/" + CompressName.Text + ".zip";
+            string targetLocation = files[0].DirectoryPath + "/" + CompressName.Text + ".zip";
 
-            System.IO.File.Move(SourceLocation, TargetLocation);
+            System.IO.File.Move(sourceLocation, targetLocation);
 
             CompressPopUp.Visibility = Visibility.Hidden;
             
@@ -180,10 +178,10 @@ namespace SanityArchiver.DesktopUI.Views
         
         private void ZipButton_Click(object sender, RoutedEventArgs e)
         {
-            CompressTheFiles(FilesToCompress);
+            CompressTheFiles(_filesToCompress);
             RefreshBrowser();
             CompressPopUp.Visibility = Visibility.Hidden;
-            FilesToCompress = new List<File>();
+            _filesToCompress = new List<File>();
             ClearCheckingOnFiles();
         }
 
@@ -194,17 +192,17 @@ namespace SanityArchiver.DesktopUI.Views
 
         private void Encrypt(object sender, RoutedEventArgs e)
         {
-            foreach (var file in AllFiles)
+            foreach (var file in _allFiles)
             {
                 if (file.IsChecked)
                 {
                     if (file.Extension == ".txt")
                     {
-                        FilesToEncrypt.Add(file);
+                        _filesToEncrypt.Add(file);
                     }
                     else
                     {
-                        Console.WriteLine("Not a txt file");
+                        Console.WriteLine(@"Not a txt file");
                     }
                 }
             }
@@ -214,11 +212,11 @@ namespace SanityArchiver.DesktopUI.Views
 
         private void EncryptFiles()
         {
-            foreach (var file in FilesToEncrypt)
+            foreach (var file in _filesToEncrypt)
             {
                 System.IO.File.Encrypt(file.FullPath);
-                ChangeFileExtension(FilesToEncrypt, ".ENC",file.FileName);
-                FilesToEncrypt = new List<File>();
+                ChangeFileExtension(_filesToEncrypt, ".ENC");
+                _filesToEncrypt = new List<File>();
             }
             ClearCheckingOnFiles();
         }
@@ -230,10 +228,9 @@ namespace SanityArchiver.DesktopUI.Views
                 try
                 {
                     System.IO.File.Decrypt(file.FullPath);
-                    ChangeFileExtension(files, ".txt", file.FileName + "_" + DateTime.Now.ToString());
+                    ChangeFileExtension(files, ".txt");
                 } catch (FileNotFoundException)
                 {
-                    continue;
                 }
             }
             ClearCheckingOnFiles();
@@ -241,34 +238,34 @@ namespace SanityArchiver.DesktopUI.Views
 
         private void ClearCheckingOnFiles()
         {
-            foreach (var file in AllFiles)
+            foreach (var file in _allFiles)
             {
                 file.IsChecked = false;
             }
         }
 
-        private void ChangeFileExtension(List<File> filesToEncrypt, string Extension, string FileName)
+        private void ChangeFileExtension(IEnumerable<File> filesToEncrypt, string extension)
         {
             foreach (var file in filesToEncrypt)
             {
-                System.IO.File.Move(file.FullPath, Path.ChangeExtension(file.FullPath, Extension));
+                System.IO.File.Move(file.FullPath, System.IO.Path.ChangeExtension(file.FullPath, extension) ?? throw new InvalidOperationException());
             }
         }
 
         private void DecryptButton_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var file in AllFiles)
+            foreach (var file in _allFiles)
             {
                 if (file.IsChecked)
                 {
                     if (file.Extension == ".ENC")
                     {
-                        FilesToDecrypt.Add(file);
+                        _filesToDecrypt.Add(file);
                     }
                 }
             }
 
-            DecryptFiles(FilesToDecrypt);
+            DecryptFiles(_filesToDecrypt);
 
         }
 
@@ -276,41 +273,55 @@ namespace SanityArchiver.DesktopUI.Views
         private void ChangeFileAttributesWindow()
         {
             AttribPopUp.Visibility = Visibility.Visible;
-            AttribFileName.Text = SelectedFile.FileName;
-            AttribExtension.Text = SelectedFile.Extension;
-            AttribHidden.IsChecked = SelectedFile.IsHidden;
+            AttribFileName.Text = CutExtensionFromFileName(_selectedFile.FileName);
+            AttribExtension.Text = _selectedFile.Extension;
+            AttribHidden.IsChecked = _selectedFile.IsHidden;
+        }
+
+        private string CutExtensionFromFileName(string fileName)
+        {
+            int fileExtPos = fileName.LastIndexOf(".", StringComparison.Ordinal);
+            return fileExtPos >= 0 ? fileName.Substring(0, fileExtPos) : fileName;
         }
 
         private void AttribSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            SelectedFile.Extension = AttribExtension.Text;
-            SelectedFile.IsHidden = (bool)AttribHidden.IsChecked;
+            _selectedFile.Extension = AttribExtension.Text;
+            if (AttribHidden.IsChecked != null)
+            {
+                _selectedFile.IsHidden = (bool) AttribHidden.IsChecked;
+            }
+
             AttribPopUp.Visibility = Visibility.Hidden;
             SaveChangedFileData(AttribFileName.Text);
         }
 
-        public void SaveChangedFileData(string NewFileName)
+        /// <summary>
+        /// Saves all the new attributes from the Attribute changer window.
+        /// </summary>
+        /// <param name="newFileName">Provide the new file name for the file.</param>
+        public void SaveChangedFileData(string newFileName)
         {
-            if (SelectedFile.IsHidden)
+            if (_selectedFile.IsHidden)
             {
-                System.IO.File.SetAttributes(SelectedFile.FullPath, System.IO.File.GetAttributes(SelectedFile.FullPath) | FileAttributes.Hidden);
+                System.IO.File.SetAttributes(_selectedFile.FullPath, System.IO.File.GetAttributes(_selectedFile.FullPath) | FileAttributes.Hidden);
             }
             else
             {
-                System.IO.File.SetAttributes(SelectedFile.FullPath, FileAttributes.Normal);
+                System.IO.File.SetAttributes(_selectedFile.FullPath, FileAttributes.Normal);
             }
-            System.IO.File.Move(SelectedFile.FullPath, Path.ChangeExtension(SelectedFile.DirectoryPath + "/" + NewFileName, SelectedFile.Extension));
+            System.IO.File.Move(_selectedFile.FullPath, System.IO.Path.ChangeExtension(_selectedFile.DirectoryPath + "/" + newFileName, _selectedFile.Extension));
         }
 
         private void AttribCloseButton_OnClickCloseButton_Click(object sender, RoutedEventArgs e)
         {
-            SelectedFile = new File();
+            _selectedFile = new File();
             AttribPopUp.Visibility = Visibility.Hidden;
         }
 
         private void EventSetter_OnHandler(object sender, MouseButtonEventArgs e)
         {
-            SelectedFile = FilesDataGrid.SelectedItem as File;
+            _selectedFile = FilesDataGrid.SelectedItem as File;
             ChangeFileAttributesWindow();
         }
 
@@ -325,12 +336,15 @@ namespace SanityArchiver.DesktopUI.Views
         /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
         /// Sets a List of Directory as ObservableCollection
         /// </summary>
-        /// <param name="Dirs"> List of directories</param>
-        public MainWindowViewModel(List<Directory> Dirs)
+        /// <param name="dirs"> List of directories</param>
+        public MainWindowViewModel(List<Directory> dirs)
         {
-            this.Directories = new ObservableCollection<Directory>(Dirs);
+            this.Directories = new ObservableCollection<Directory>(dirs);
         }
 
+        /// <summary>
+        /// It's a collection of Directories
+        /// </summary>
         public ObservableCollection<Directory> Directories
         {
             get => (ObservableCollection<Directory>)GetValue(DirectoriesProperty);
@@ -342,17 +356,6 @@ namespace SanityArchiver.DesktopUI.Views
         /// </summary>
         public static readonly DependencyProperty DirectoriesProperty =
             DependencyProperty.Register("Directories", typeof(ObservableCollection<Directory>), typeof(MainWindowViewModel), new UIPropertyMetadata(null));
-
-        public Directory BaseDir
-        {
-            get => (Directory)GetValue(BaseDirProperty);
-            set => SetValue(BaseDirProperty, value);
-        }
-
-        public static readonly DependencyProperty BaseDirProperty =
-            DependencyProperty.Register("BaseDir", typeof(Directory), typeof(MainWindowViewModel), new UIPropertyMetadata(null));
-
-
     }
     /// <summary>
     /// Directory class
@@ -406,17 +409,45 @@ namespace SanityArchiver.DesktopUI.Views
     /// </summary>
     public class File
     {
+        /// <summary>
+        /// Path of the directory which holds the file
+        /// </summary>
         public string DirectoryPath { get; set; }
+        /// <summary>
+        /// Name of the file
+        /// </summary>
         public string FileName { get; set; }
+        /// <summary>
+        /// The extension of the file as string
+        /// </summary>
         public string Extension { get; set; }
+        /// <summary>
+        /// Size of the file as double
+        /// </summary>
         public double Size { get; set; }
 
+        /// <summary>
+        /// Property for the checkboxes in the DataGrid
+        /// </summary>
         public bool IsChecked { get; set; }
+        /// <summary>
+        /// True if the file has the hidden attribute
+        /// </summary>
         public bool IsHidden { get; set; }
 
+        /// <summary>
+        /// Date of creation in DateTime
+        /// </summary>
         public DateTime Created { get; set; }
-        public string FullPath => System.IO.Path.Combine(DirectoryPath, FileName);
+        /// <summary>
+        /// Full path built from the Directory path + Filename
+        /// </summary>
+        public string FullPath => Path.Combine(DirectoryPath, FileName);
 
+        /// <summary>
+        /// ToString method which only returns the FileName
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return FileName;
