@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -34,6 +35,8 @@ namespace SanityArchiver.DesktopUI.Views
         private List<File> FilesToEncrypt = new List<File>();
 
         private List<File> FilesToDecrypt = new List<File>();
+
+        private File SelectedFile;
 
         private Directory dir = new Directory();
 
@@ -82,6 +85,7 @@ namespace SanityArchiver.DesktopUI.Views
                     Size = fi.Length,
                     Created = fi.CreationTime,
                     IsChecked = false,
+                    IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden),
                     Extension = System.IO.Path.GetExtension(files[i]),
                 };
 
@@ -267,6 +271,49 @@ namespace SanityArchiver.DesktopUI.Views
             DecryptFiles(FilesToDecrypt);
 
         }
+
+
+        private void ChangeFileAttributesWindow()
+        {
+            AttribPopUp.Visibility = Visibility.Visible;
+            AttribFileName.Text = SelectedFile.FileName;
+            AttribExtension.Text = SelectedFile.Extension;
+            AttribHidden.IsChecked = SelectedFile.IsHidden;
+        }
+
+        private void AttribSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            SelectedFile.Extension = AttribExtension.Text;
+            SelectedFile.IsHidden = (bool)AttribHidden.IsChecked;
+            AttribPopUp.Visibility = Visibility.Hidden;
+            SaveChangedFileData(AttribFileName.Text);
+        }
+
+        public void SaveChangedFileData(string NewFileName)
+        {
+            if (SelectedFile.IsHidden)
+            {
+                System.IO.File.SetAttributes(SelectedFile.FullPath, System.IO.File.GetAttributes(SelectedFile.FullPath) | FileAttributes.Hidden);
+            }
+            else
+            {
+                System.IO.File.SetAttributes(SelectedFile.FullPath, FileAttributes.Normal);
+            }
+            System.IO.File.Move(SelectedFile.FullPath, Path.ChangeExtension(SelectedFile.DirectoryPath + "/" + NewFileName, SelectedFile.Extension));
+        }
+
+        private void AttribCloseButton_OnClickCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            SelectedFile = new File();
+            AttribPopUp.Visibility = Visibility.Hidden;
+        }
+
+        private void EventSetter_OnHandler(object sender, MouseButtonEventArgs e)
+        {
+            SelectedFile = FilesDataGrid.SelectedItem as File;
+            ChangeFileAttributesWindow();
+        }
+
     }
 
     /// <summary>
@@ -365,6 +412,7 @@ namespace SanityArchiver.DesktopUI.Views
         public double Size { get; set; }
 
         public bool IsChecked { get; set; }
+        public bool IsHidden { get; set; }
 
         public DateTime Created { get; set; }
         public string FullPath => System.IO.Path.Combine(DirectoryPath, FileName);

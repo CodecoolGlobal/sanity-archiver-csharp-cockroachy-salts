@@ -31,24 +31,43 @@
             </TreeView.RenderTransform>
             <TreeViewItem ItemsSource="{Binding Directories}" Header="Choose directory"/>
         </TreeView>
-        <DataGrid x:Name="FilesDataGrid" AutoGenerateColumns="False" Margin="234,12,10.286,62.714">
-
+        <DataGrid x:Name="FilesDataGrid" AutoGenerateColumns="False" Margin="234,12,10.286,62.714" SelectionMode="Extended">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <EventSetter Event="MouseDoubleClick" Handler="EventSetter_OnHandler"></EventSetter>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridCheckBoxColumn x:Name="CheckBox" Header="" Binding="{Binding IsChecked}"/>
-                <DataGridTextColumn IsReadOnly="True" Binding="{Binding FileName}" Header="Name" Width="200"/>
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding FileName}"  Header="Name" Width="200"/>
                 <DataGridTextColumn IsReadOnly="True" Binding="{Binding Created}" Header="Created" Width="200"/>
                 <DataGridTextColumn IsReadOnly="True" Binding="{Binding Size}" Header="Size(kb)" Width="200"/>
             </DataGrid.Columns>
-
         </DataGrid>
 
         <Button x:Name="CompressButton" Content="Compress" HorizontalAlignment="Left" Margin="234,364,0,30.714" Width="75" Click="CompressButton_Click"/>
+
+        <Grid x:Name="AttribPopUp" Visibility="Hidden" Width="300" Height="250" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightCoral">
+            <ListView>
+                <Label>FileName</Label>
+                <TextBox x:Name="AttribFileName">FileName</TextBox>
+                <Label>Extension</Label>
+                <TextBox x:Name="AttribExtension" >Extension</TextBox>
+                <Label>Visibility</Label>
+                <CheckBox x:Name="AttribHidden" >Hidden</CheckBox>
+            </ListView>
+            <Button x:Name="AttribSaveButton" Click="AttribSaveButton_Click" Width="50" Height="50" HorizontalAlignment="Left" Margin="50,0,0,0" VerticalAlignment="Bottom">Save</Button>
+            <Button x:Name="AttribCloseButton" Click="AttribCloseButton_OnClickCloseButton_Click" Width="50" Height="50" HorizontalAlignment="Right" Margin="0,0,50,0" VerticalAlignment="Bottom">Cancel</Button>
+        </Grid>
 
         <Grid x:Name="CompressPopUp" Visibility="Hidden" Width="270" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightCoral">
             <TextBox x:Name="CompressName" HorizontalAlignment="Center" VerticalAlignment="Top" >NameOfTheZip</TextBox>
             <Button x:Name="ZipButton" Click="ZipButton_Click" Width="50" Height="50" HorizontalAlignment="Left" Margin="50,0,0,0">Zip</Button>
             <Button x:Name="CompressCloseButton" Click="CompressCloseButton_Click" Width="50" Height="50" HorizontalAlignment="Right" Margin="0,0,50,0">Cancel</Button>
         </Grid>
+
+        
+
         <Button Content="Encrypt" HorizontalAlignment="Left" Margin="314,362,0,0" VerticalAlignment="Top" Width="75" Height="27" Click="Encrypt"/>
         <Button Content="Decrypt" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="709,362,0,0" Click="DecryptButton_Click"/>
     </Grid>
