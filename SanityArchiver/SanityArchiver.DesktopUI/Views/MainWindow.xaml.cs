@@ -213,7 +213,7 @@ namespace SanityArchiver.DesktopUI.Views
             foreach (var file in FilesToEncrypt)
             {
                 System.IO.File.Encrypt(file.FullPath);
-                ChangeFileExtension(FilesToEncrypt,file.FileName, ".ENC");
+                ChangeFileExtension(FilesToEncrypt, ".ENC",file.FileName);
                 FilesToEncrypt = new List<File>();
             }
             ClearCheckingOnFiles();
@@ -226,7 +226,7 @@ namespace SanityArchiver.DesktopUI.Views
                 try
                 {
                     System.IO.File.Decrypt(file.FullPath);
-                    ChangeFileExtension(files,file.FileName + "_" + DateTime.Now.ToString(), ".txt");
+                    ChangeFileExtension(files, ".txt", file.FileName + "_" + DateTime.Now.ToString());
                 } catch (FileNotFoundException)
                 {
                     continue;
@@ -247,8 +247,7 @@ namespace SanityArchiver.DesktopUI.Views
         {
             foreach (var file in filesToEncrypt)
             {
-                Console.WriteLine(file.FullPath);
-                System.IO.File.Move(file.FullPath, Path.ChangeExtension(FileName, Extension));
+                System.IO.File.Move(file.FullPath, Path.ChangeExtension(file.FullPath, Extension));
             }
         }
 
