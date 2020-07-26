@@ -16,9 +16,19 @@ namespace SanityArchiver.DesktopUI.ViewModels
     /// </summary>
     public class MainWindowViewModel : DependencyObject
     {
-        private Directory _dir { get; set; } = new Directory();
+        public Directory _dir { get; set; } = new Directory();
+
+        public List<File> AllFiles { get; set; } = new List<File>();
 
         private const string Path = "C:/Users/Tamás/Desktop/Projektek";
+
+        public List<File> _filesToCompress { get; set; } = new List<File>();
+
+        public List<File> _filesToEncrypt = new List<File>();
+
+        public  List<File> _filesToDecrypt = new List<File>();
+
+        public File _selectedFile = new File();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
@@ -29,7 +39,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         {
             Seed();
             this.Directories = new ObservableCollection<Directory>(new List<Directory>(){_dir});
-            this.Files = new ObservableCollection<File>();
+            this.Files = new ObservableCollection<File>(AllFiles);
         }
 
         private void Seed()
@@ -63,6 +73,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
                 };
 
                 dir.Files.Add(file);
+                AllFiles.Add(file);
             }
 
             foreach (var directory in dirs)
