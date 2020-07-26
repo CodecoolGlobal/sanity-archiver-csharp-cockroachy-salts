@@ -39,7 +39,6 @@ namespace SanityArchiver.DesktopUI.Views
 
         private File _selectedFile;
 
-        private Directory _dir = new Directory();
 
         /// <summary>
         /// We need this for the Folder Tree
@@ -59,51 +58,9 @@ namespace SanityArchiver.DesktopUI.Views
         /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            _dir = new Directory() { Name = "Projektek" };
-            RecurseDir(Path, ref _dir);
-
-            Vm = new MainWindowViewModel(new List<Directory>() { _dir });
+            Vm = new MainWindowViewModel();
         }
 
-        /// <summary>
-        /// Recursively look for folders, subfolders, and files
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="dir"></param>
-        private void RecurseDir(string path, ref Directory dir)
-        {
-            var files = System.IO.Directory.GetFiles(path);
-            var dirs = System.IO.Directory.GetDirectories(path);
-
-            dir.Name = path.Substring(path.LastIndexOf("\\", StringComparison.Ordinal) + 1);
-
-            foreach (var fileInFiles in files)
-            {
-                var fi = new FileInfo(fileInFiles);
-
-                var file = new File()
-                {
-                    FileName = System.IO.Path.GetFileName(fileInFiles),
-                    DirectoryPath = System.IO.Path.GetDirectoryName(fileInFiles),
-                    Size = fi.Length,
-                    Created = fi.CreationTime,
-                    IsChecked = false,
-                    IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden),
-                    Extension = System.IO.Path.GetExtension(fileInFiles),
-                };
-
-                dir.Files.Add(file);
-                _allFiles.Add(file);
-            }
-
-            foreach (var directory in dirs)
-            {
-                var d = new Directory() { Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1) };
-                RecurseDir(directory, ref d);
-                dir.Directories.Add(d);
-            }
-
-        }
 
         /// <summary>
         /// Controls the browsing trough the directory tree
