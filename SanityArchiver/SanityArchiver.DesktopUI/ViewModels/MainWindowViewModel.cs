@@ -115,5 +115,68 @@ namespace SanityArchiver.DesktopUI.ViewModels
             DependencyProperty.Register("Files", typeof(ObservableCollection<File>), typeof(Views.MainWindow), new UIPropertyMetadata(null));
 
         private Directory _directory;
+
+
+        public void EncryptFiles()
+        {
+            foreach (var file in _filesToEncrypt)
+            {
+                System.IO.File.Encrypt(file.FullPath);
+                ChangeFileExtension(_filesToEncrypt, ".ENC");
+                _filesToEncrypt = new List<File>();
+            }
+            ClearCheckingOnFiles();
+        }
+
+        public void DecryptFiles(List<File> files)
+        {
+            foreach (var file in files)
+            {
+                try
+                {
+                    System.IO.File.Decrypt(file.FullPath);
+                    ChangeFileExtension(files, ".txt");
+                }
+                catch (FileNotFoundException)
+                {
+                }
+            }
+            ClearCheckingOnFiles();
+        }
+
+        public void ClearCheckingOnFiles()
+        {
+            foreach (var file in Files)
+            {
+                file.IsChecked = false;
+            }
+        }
+
+        public void ChangeFileExtension(IEnumerable<File> filesToEncrypt, string extension)
+        {
+            foreach (var file in filesToEncrypt)
+            {
+                System.IO.File.Move(file.FullPath, System.IO.Path.ChangeExtension(file.FullPath, extension) ?? throw new InvalidOperationException());
+            }
+        }
+
+        public void SaveChangedFileData(string newFileName)
+        {
+            if (_selectedFile.IsHidden)
+            {
+                System.IO.File.SetAttributes(_selectedFile.FullPath, System.IO.File.GetAttributes(_selectedFile.FullPath) | FileAttributes.Hidden);
+            }
+            else
+            {
+                System.IO.File.SetAttributes(_selectedFile.FullPath, FileAttributes.Normal);
+            }
+            System.IO.File.Move(_selectedFile.FullPath, System.IO.Path.ChangeExtension(_selectedFile.DirectoryPath + "/" + newFileName, _selectedFile.Extension));
+        }
+
+        public string CutExtensionFromFileName(string fileName)
+        {
+            int fileExtPos = fileName.LastIndexOf(".", StringComparison.Ordinal);
+            return fileExtPos >= 0 ? fileName.Substring(0, fileExtPos) : fileName;
+        }
     }
 }

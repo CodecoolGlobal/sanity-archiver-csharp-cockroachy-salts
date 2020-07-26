@@ -70,7 +70,7 @@ namespace SanityArchiver.DesktopUI.Views
         /// </summary>
         public void RefreshBrowser()
         {
-            new MainWindow();
+            var mainWindow = new MainWindow();
         }
 
         /// <summary>
@@ -102,10 +102,9 @@ namespace SanityArchiver.DesktopUI.Views
             CompressPopUp.Visibility = Visibility.Visible;
             
         }
-
         private void CompressTheFiles(IReadOnlyList<File> files)
         {
-            using (var zip = ZipFile.Open(CompressName.Text+".zip", ZipArchiveMode.Create))
+            using (var zip = ZipFile.Open(CompressName.Text + ".zip", ZipArchiveMode.Create))
             {
                 foreach (var file in files)
                 {
@@ -121,17 +120,16 @@ namespace SanityArchiver.DesktopUI.Views
             System.IO.File.Move(sourceLocation, targetLocation);
 
             CompressPopUp.Visibility = Visibility.Hidden;
-            
+
 
         }
-        
         private void ZipButton_Click(object sender, RoutedEventArgs e)
         {
             CompressTheFiles(_vm._filesToCompress);
             RefreshBrowser();
             CompressPopUp.Visibility = Visibility.Hidden;
             _vm._filesToCompress = new List<File>();
-            ClearCheckingOnFiles();
+            _vm.ClearCheckingOnFiles();
         }
 
         private void CompressCloseButton_Click(object sender, RoutedEventArgs e)
@@ -155,51 +153,11 @@ namespace SanityArchiver.DesktopUI.Views
                     }
                 }
             }
-            EncryptFiles();
-            ClearCheckingOnFiles();
+            _vm.EncryptFiles();
+            _vm.ClearCheckingOnFiles();
         }
 
-        private void EncryptFiles()
-        {
-            foreach (var file in _vm._filesToEncrypt)
-            {
-                System.IO.File.Encrypt(file.FullPath);
-                ChangeFileExtension(_vm._filesToEncrypt, ".ENC");
-                _vm._filesToEncrypt = new List<File>();
-            }
-            ClearCheckingOnFiles();
-        }
-
-        private void DecryptFiles(List<File> files)
-        {
-            foreach (var file in files)
-            {
-                try
-                {
-                    System.IO.File.Decrypt(file.FullPath);
-                    ChangeFileExtension(files, ".txt");
-                } catch (FileNotFoundException)
-                {
-                }
-            }
-            ClearCheckingOnFiles();
-        }
-
-        private void ClearCheckingOnFiles()
-        {
-            foreach (var file in _vm.Files)
-            {
-                file.IsChecked = false;
-            }
-        }
-
-        private void ChangeFileExtension(IEnumerable<File> filesToEncrypt, string extension)
-        {
-            foreach (var file in filesToEncrypt)
-            {
-                System.IO.File.Move(file.FullPath, System.IO.Path.ChangeExtension(file.FullPath, extension) ?? throw new InvalidOperationException());
-            }
-        }
+        
 
         private void DecryptButton_Click(object sender, RoutedEventArgs e)
         {
@@ -214,7 +172,7 @@ namespace SanityArchiver.DesktopUI.Views
                 }
             }
 
-            DecryptFiles(_vm._filesToDecrypt);
+            _vm.DecryptFiles(_vm._filesToDecrypt);
 
         }
 
@@ -222,16 +180,11 @@ namespace SanityArchiver.DesktopUI.Views
         private void ChangeFileAttributesWindow()
         {
             AttribPopUp.Visibility = Visibility.Visible;
-            AttribFileName.Text = CutExtensionFromFileName(_vm._selectedFile.FileName);
+            AttribFileName.Text = _vm.CutExtensionFromFileName(_vm._selectedFile.FileName);
             AttribExtension.Text = _vm._selectedFile.Extension;
             AttribHidden.IsChecked = _vm._selectedFile.IsHidden;
         }
 
-        private string CutExtensionFromFileName(string fileName)
-        {
-            int fileExtPos = fileName.LastIndexOf(".", StringComparison.Ordinal);
-            return fileExtPos >= 0 ? fileName.Substring(0, fileExtPos) : fileName;
-        }
 
         private void AttribSaveButton_Click(object sender, RoutedEventArgs e)
         {
@@ -242,25 +195,14 @@ namespace SanityArchiver.DesktopUI.Views
             }
 
             AttribPopUp.Visibility = Visibility.Hidden;
-            SaveChangedFileData(AttribFileName.Text);
+            _vm.SaveChangedFileData(AttribFileName.Text);
         }
 
         /// <summary>
         /// Saves all the new attributes from the Attribute changer window.
         /// </summary>
         /// <param name="newFileName">Provide the new file name for the file.</param>
-        public void SaveChangedFileData(string newFileName)
-        {
-            if (_vm._selectedFile.IsHidden)
-            {
-                System.IO.File.SetAttributes(_vm._selectedFile.FullPath, System.IO.File.GetAttributes(_vm._selectedFile.FullPath) | FileAttributes.Hidden);
-            }
-            else
-            {
-                System.IO.File.SetAttributes(_vm._selectedFile.FullPath, FileAttributes.Normal);
-            }
-            System.IO.File.Move(_vm._selectedFile.FullPath, System.IO.Path.ChangeExtension(_vm._selectedFile.DirectoryPath + "/" + newFileName, _vm._selectedFile.Extension));
-        }
+        
 
         private void AttribCloseButton_OnClickCloseButton_Click(object sender, RoutedEventArgs e)
         {
