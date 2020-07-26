@@ -6,6 +6,9 @@ using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using SanityArchiver.DesktopUI.ViewModels;
+using Directory = SanityArchiver.DesktopUI.Models.Directory;
+using File = SanityArchiver.DesktopUI.Models.File;
 
 namespace SanityArchiver.DesktopUI.Views
 {
@@ -325,132 +328,5 @@ namespace SanityArchiver.DesktopUI.Views
             ChangeFileAttributesWindow();
         }
 
-    }
-
-    /// <summary>
-    /// Interaction Logic for ViewModel
-    /// </summary>
-    public class MainWindowViewModel : DependencyObject
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
-        /// Sets a List of Directory as ObservableCollection
-        /// </summary>
-        /// <param name="dirs"> List of directories</param>
-        public MainWindowViewModel(List<Directory> dirs)
-        {
-            this.Directories = new ObservableCollection<Directory>(dirs);
-        }
-
-        /// <summary>
-        /// It's a collection of Directories
-        /// </summary>
-        public ObservableCollection<Directory> Directories
-        {
-            get => (ObservableCollection<Directory>)GetValue(DirectoriesProperty);
-            set => SetValue(DirectoriesProperty, value);
-        }
-
-        /// <summary>
-        /// Registers Directories as DependencyProperty
-        /// </summary>
-        public static readonly DependencyProperty DirectoriesProperty =
-            DependencyProperty.Register("Directories", typeof(ObservableCollection<Directory>), typeof(MainWindowViewModel), new UIPropertyMetadata(null));
-    }
-    /// <summary>
-    /// Directory class
-    /// </summary>
-    public class Directory
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Directory"/> class.
-        /// Directory constructor
-        /// </summary>
-        public Directory()
-        {
-            Files = new List<File>();
-            Directories = new List<Directory>();
-        }
-        /// <summary>
-        /// Getter and setter for List of files
-        /// </summary>
-        public List<File> Files { get; private set; }
-        /// <summary>
-        /// Getter and setter for list of directories
-        /// </summary>
-        public List<Directory> Directories { get; private set; }
-        /// <summary>
-        /// Getter and setter for dir name
-        /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// File counter
-        /// </summary>
-        public int FileCount => Files.Count;
-
-        /// <summary>
-        /// Dir counter
-        /// </summary>
-        public int DirectoryCount => Directories.Count;
-
-        /// <summary>
-        /// To string method for dir names
-        /// </summary>
-        /// <returns> String of name</returns>
-        public override string ToString()
-        {
-            return Name;
-        }
-    }
-
-
-    /// <summary>
-    /// File class
-    /// </summary>
-    public class File
-    {
-        /// <summary>
-        /// Path of the directory which holds the file
-        /// </summary>
-        public string DirectoryPath { get; set; }
-        /// <summary>
-        /// Name of the file
-        /// </summary>
-        public string FileName { get; set; }
-        /// <summary>
-        /// The extension of the file as string
-        /// </summary>
-        public string Extension { get; set; }
-        /// <summary>
-        /// Size of the file as double
-        /// </summary>
-        public double Size { get; set; }
-
-        /// <summary>
-        /// Property for the checkboxes in the DataGrid
-        /// </summary>
-        public bool IsChecked { get; set; }
-        /// <summary>
-        /// True if the file has the hidden attribute
-        /// </summary>
-        public bool IsHidden { get; set; }
-
-        /// <summary>
-        /// Date of creation in DateTime
-        /// </summary>
-        public DateTime Created { get; set; }
-        /// <summary>
-        /// Full path built from the Directory path + Filename
-        /// </summary>
-        public string FullPath => Path.Combine(DirectoryPath, FileName);
-
-        /// <summary>
-        /// ToString method which only returns the FileName
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return FileName;
-        }
     }
 }

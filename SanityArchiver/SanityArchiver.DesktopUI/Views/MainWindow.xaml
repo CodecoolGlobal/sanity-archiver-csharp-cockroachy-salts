@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SanityArchiver.DesktopUI.Views"
         xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:models="clr-namespace:SanityArchiver.DesktopUI.Models"
         mc:Ignorable="d"
         Title="Sanity Archiver" Height="450" Width="800">
     <Grid x:Name="MainWindow1" Loaded="Window_Loaded">
@@ -12,7 +13,7 @@
 
         <Grid.Resources>
 
-            <HierarchicalDataTemplate DataType="{x:Type local:Directory}" ItemsSource ="{Binding Directories}">
+            <HierarchicalDataTemplate DataType="{x:Type models:Directory}" ItemsSource ="{Binding Directories}">
 
                 <TextBlock Text="{Binding Path=Name}" MouseDown="NameCol_mousedown"/>
 
