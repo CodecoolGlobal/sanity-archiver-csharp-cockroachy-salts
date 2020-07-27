@@ -204,7 +204,38 @@ namespace SanityArchiver.DesktopUI.ViewModels
                 if (_boundText != value)
                 {
                     _boundText = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged("BoundText");
+                    SearchEnabled = _boundText.Length >= 3;
+                }
+            }
+        }
+
+        private string _foundFilesText = "TEST";
+
+        public string FoundFilesText
+        {
+            get { return _foundFilesText; }
+            set
+            {
+                if (_foundFilesText!= value)
+                {
+                    _foundFilesText = value;
+                    OnPropertyChanged("FoundFilesText");
+                }
+            }
+        }
+
+        private bool _searchEnabled = false;
+
+        public bool SearchEnabled
+        {
+            get { return _searchEnabled; }
+            set
+            {
+                if (_searchEnabled != value)
+                {
+                    _searchEnabled = value;
+                    OnPropertyChanged("SearchEnabled");
                 }
             }
         }
@@ -212,9 +243,13 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (PropertyChanged != null)
+            {
+                Console.WriteLine(propertyName);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         public ObservableCollection<File> SearchFile()
@@ -227,6 +262,9 @@ namespace SanityArchiver.DesktopUI.ViewModels
                     FoundFiles.Add(file);
                 }
             }
+
+            FoundFilesText = $"We found {FoundFiles.Count} files matching the criteria.";
+            OnPropertyChanged("FoundFilesText");
             return FoundFiles;
         }
     }

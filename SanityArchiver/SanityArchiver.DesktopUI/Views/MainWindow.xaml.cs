@@ -200,5 +200,6 @@ namespace SanityArchiver.DesktopUI.Views
         {
             ShowFilesInGrid(_vm.SearchFile());
         }
+
     }
 }
