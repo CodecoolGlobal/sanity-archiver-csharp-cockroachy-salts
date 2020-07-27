@@ -20,7 +20,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
         public List<File> AllFiles { get; set; } = new List<File>();
 
-        private const string Path = "C:/Users/Tamás/Desktop/Projektek";
+        private const string Path = "C:/Users/Kornél/codecool";
 
         public List<File> _filesToCompress { get; set; } = new List<File>();
 
@@ -45,7 +45,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private void Seed()
         {
             _directory = _dir;
-            _directory = new Directory() { Name = "Projektek" };
+            _directory = new Directory() { Name = "codecool" };
             RecurseDir(Path, ref _directory);
             _dir = _directory;
         }
