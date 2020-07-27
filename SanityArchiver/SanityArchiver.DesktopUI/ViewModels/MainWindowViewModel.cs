@@ -1,53 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Windows;
+using SanityArchiver.DesktopUI.ViewModels.Commands;
 using SanityArchiver.DesktopUI.Views;
 using Directory = SanityArchiver.DesktopUI.Models.Directory;
 using File = SanityArchiver.DesktopUI.Models.File;
 
 namespace SanityArchiver.DesktopUI.ViewModels
-{   /// <summary>
+{
+    /// <summary>
     /// MainWindowViewModel
     /// </summary>
-    public class MainWindowViewModel : DependencyObject
+    public class MainWindowViewModel : DependencyObject, INotifyPropertyChanged
     {
-        public Directory _dir { get; set; } = new Directory();
+        public Directory Dir { get; set; } = new Directory();
 
         public List<File> AllFiles { get; set; } = new List<File>();
 
         private const string Path = "C:/Users/Kornél/codecool";
 
-        public List<File> _filesToCompress { get; set; } = new List<File>();
+        public List<File> FilesToCompress { get; set; } = new List<File>();
 
-        public List<File> _filesToEncrypt = new List<File>();
+        public List<File> FilesToEncrypt = new List<File>();
 
-        public  List<File> _filesToDecrypt = new List<File>();
+        public List<File> FilesToDecrypt = new List<File>();
 
-        public File _selectedFile = new File();
+        public File SelectedFile = new File();
+
+        public SearchCommand SearchCommand { get; set; }
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
         /// Sets a List of Directory as ObservableCollection
         /// </summary>
-        /// <param name="dirs"> List of directories</param>
         public MainWindowViewModel()
         {
             Seed();
-            this.Directories = new ObservableCollection<Directory>(new List<Directory>(){_dir});
-            this.Files = new ObservableCollection<File>(AllFiles);
+            Directories = new ObservableCollection<Directory>(new List<Directory> {Dir});
+            Files = new ObservableCollection<File>(AllFiles);
+            SearchCommand = new SearchCommand(this);
         }
 
         private void Seed()
         {
-            _directory = _dir;
-            _directory = new Directory() { Name = "codecool" };
+            _directory = Dir;
+            _directory = new Directory {Name = "codecool"};
             RecurseDir(Path, ref _directory);
-            _dir = _directory;
+            Dir = _directory;
         }
 
         private void RecurseDir(string path, ref Directory dir)
@@ -61,7 +66,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
             {
                 var fi = new FileInfo(fileInFiles);
 
-                var file = new File()
+                var file = new File
                 {
                     FileName = System.IO.Path.GetFileName(fileInFiles),
                     DirectoryPath = System.IO.Path.GetDirectoryName(fileInFiles),
@@ -78,7 +83,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
             foreach (var directory in dirs)
             {
-                var d = new Directory() { Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1) };
+                var d = new Directory {Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1)};
                 RecurseDir(directory, ref d);
                 dir.Directories.Add(d);
             }
@@ -90,15 +95,16 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// </summary>
         public ObservableCollection<Directory> Directories
         {
-            get => (ObservableCollection<Directory>)GetValue(DirectoriesProperty);
+            get => (ObservableCollection<Directory>) GetValue(DirectoriesProperty);
             set => SetValue(DirectoriesProperty, value);
         }
+
         /// <summary>
         /// It's a collection of Files
         /// </summary>
         public ObservableCollection<File> Files
         {
-            get => (ObservableCollection<File>)GetValue(FilesProperty);
+            get => (ObservableCollection<File>) GetValue(FilesProperty);
             set => SetValue(FilesProperty, value);
         }
 
@@ -106,25 +112,28 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// Registers Directories as DependencyProperty
         /// </summary>
         public static readonly DependencyProperty DirectoriesProperty =
-            DependencyProperty.Register("Directories", typeof(ObservableCollection<Directory>), typeof(Views.MainWindow), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Directories", typeof(ObservableCollection<Directory>),
+                typeof(MainWindow), new UIPropertyMetadata(null));
 
         /// <summary>
         /// Registers Files as DependencyProperty
         /// </summary>
         public static readonly DependencyProperty FilesProperty =
-            DependencyProperty.Register("Files", typeof(ObservableCollection<File>), typeof(Views.MainWindow), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Files", typeof(ObservableCollection<File>), typeof(MainWindow),
+                new UIPropertyMetadata(null));
 
         private Directory _directory;
 
 
         public void EncryptFiles()
         {
-            foreach (var file in _filesToEncrypt)
+            foreach (var file in FilesToEncrypt)
             {
                 System.IO.File.Encrypt(file.FullPath);
-                ChangeFileExtension(_filesToEncrypt, ".ENC");
-                _filesToEncrypt = new List<File>();
+                ChangeFileExtension(FilesToEncrypt, ".ENC");
+                FilesToEncrypt = new List<File>();
             }
+
             ClearCheckingOnFiles();
         }
 
@@ -141,6 +150,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
                 {
                 }
             }
+
             ClearCheckingOnFiles();
         }
 
@@ -156,27 +166,68 @@ namespace SanityArchiver.DesktopUI.ViewModels
         {
             foreach (var file in filesToEncrypt)
             {
-                System.IO.File.Move(file.FullPath, System.IO.Path.ChangeExtension(file.FullPath, extension) ?? throw new InvalidOperationException());
+                System.IO.File.Move(file.FullPath,
+                    System.IO.Path.ChangeExtension(file.FullPath, extension) ?? throw new InvalidOperationException());
             }
         }
 
         public void SaveChangedFileData(string newFileName)
         {
-            if (_selectedFile.IsHidden)
+            if (SelectedFile.IsHidden)
             {
-                System.IO.File.SetAttributes(_selectedFile.FullPath, System.IO.File.GetAttributes(_selectedFile.FullPath) | FileAttributes.Hidden);
+                System.IO.File.SetAttributes(SelectedFile.FullPath,
+                    System.IO.File.GetAttributes(SelectedFile.FullPath) | FileAttributes.Hidden);
             }
             else
             {
-                System.IO.File.SetAttributes(_selectedFile.FullPath, FileAttributes.Normal);
+                System.IO.File.SetAttributes(SelectedFile.FullPath, FileAttributes.Normal);
             }
-            System.IO.File.Move(_selectedFile.FullPath, System.IO.Path.ChangeExtension(_selectedFile.DirectoryPath + "/" + newFileName, _selectedFile.Extension));
+
+            System.IO.File.Move(SelectedFile.FullPath,
+                System.IO.Path.ChangeExtension(SelectedFile.DirectoryPath + "/" + newFileName,
+                    SelectedFile.Extension));
         }
 
         public string CutExtensionFromFileName(string fileName)
         {
             int fileExtPos = fileName.LastIndexOf(".", StringComparison.Ordinal);
             return fileExtPos >= 0 ? fileName.Substring(0, fileExtPos) : fileName;
+        }
+
+        private string _boundText;
+
+        public string BoundText
+        {
+            get { return _boundText; }
+            set
+            {
+                if (_boundText != value)
+                {
+                    _boundText = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public ObservableCollection<File> SearchFile()
+        {
+            ObservableCollection<File> FoundFiles = new ObservableCollection<File>();
+            foreach (var file in Files)
+            {
+                if (Regex.IsMatch(file.FileName, BoundText))
+                {
+                    FoundFiles.Add(file);
+                }
+            }
+            return FoundFiles;
         }
     }
 }

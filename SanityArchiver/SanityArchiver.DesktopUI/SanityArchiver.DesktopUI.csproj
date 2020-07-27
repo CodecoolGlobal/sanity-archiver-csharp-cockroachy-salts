@@ -77,6 +77,8 @@
     </Compile>
     <Compile Include="Models\Directory.cs" />
     <Compile Include="Models\File.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="ViewModels\Commands\SearchCommand.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
