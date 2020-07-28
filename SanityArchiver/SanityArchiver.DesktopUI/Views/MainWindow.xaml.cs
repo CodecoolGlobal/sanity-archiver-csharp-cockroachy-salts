@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using SanityArchiver.DesktopUI.Models;
 using SanityArchiver.DesktopUI.ViewModels;
+using Directory = SanityArchiver.DesktopUI.Models.Directory;
+using File = SanityArchiver.DesktopUI.Models.File;
 
 namespace SanityArchiver.DesktopUI.Views
 {
@@ -215,17 +217,65 @@ namespace SanityArchiver.DesktopUI.Views
         {
             DataGrid dataGrid = (DataGrid) sender;
             var row_selected = dataGrid.SelectedItem;
-            var dir_selected = TreeView1.SelectedItem;
+            Directory directory = (Directory) TreeView1.SelectedItem;
+            Console.WriteLine(DirSize(new DirectoryInfo(directory.Path)));
             foreach (var vmFile in _vm.Files)
             {
-                string[] path = vmFile.FullPath.ToString().Split('\\');
-                if (path[path.Length - 2] + "\\" + path[path.Length - 1] == $"{dir_selected}\\{row_selected}")
+                if (vmFile.FullPath == directory.Path + @"\" + row_selected)
                 {
                     _vm.OpenEnabled = vmFile.Extension == ".txt";
                     _vm.SelectedFile = vmFile;
                     return;
                 }
             }
+        }
+
+        public static long DirSize(DirectoryInfo d)
+        {
+            long size = 0;
+            // Add file sizes.
+            FileInfo[] fis = d.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                size += fi.Length;
+            }
+
+            // Add subdirectory sizes.
+            DirectoryInfo[] dis = d.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+            {
+                size += DirSize(di);
+            }
+
+            return size;
+        }
+
+        private void TreeView1_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            try
+            {
+                Directory directory = (Directory)TreeView1.SelectedItem;
+                long ByteSize = DirSize(new DirectoryInfo(directory.Path));
+                _vm.DirectorySize = FileSizeFormatter.FormatSize(ByteSize);
+            }
+            catch (Exception ignored){}
+        }
+    }
+    public static class FileSizeFormatter
+    {
+        // Load all suffixes in an array  
+        static readonly string[] suffixes =
+            { "Bytes", "KB", "MB", "GB", "TB", "PB" };
+        public static string FormatSize(Int64 bytes)
+        {
+            int counter = 0;
+            decimal number = (decimal)bytes;
+            while (Math.Round(number / 1024) >= 1)
+            {
+                number = number / 1024;
+                counter++;
+            }
+            return string.Format("{0:n1}{1}", number, suffixes[counter]);
         }
     }
 }

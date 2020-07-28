@@ -14,16 +14,18 @@
         </Grid.Resources>
         <Grid>
             <TextBox Margin="10, 10, 0, 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="210" Height="20"
-                     Text="{Binding Path=BoundText, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                     Text="{Binding Path=SearchText, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
                      TextChanged="TextBoxBase_OnTextChanged" />
             <Button Margin="230, 10, 0, 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="20" Height="20"
                     Content="S" Command="{Binding SearchCommand}" IsEnabled="{Binding SearchEnabled}"
                     Click="Button_Click" IsDefault="True" />
             <Label Margin="10, 40, 0, 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="auto" Height="20"
-                   Content="{Binding FoundFilesText}" Padding="5,0" VerticalContentAlignment="Center"/>
-            <TreeView Margin="10,70,0,10" Name="TreeView1" HorizontalAlignment="Left" Width="240" Padding="0">
+                   Content="{Binding FoundFilesText}" Padding="5,0" VerticalContentAlignment="Center" />
+            <TreeView Margin="10,70,0,45" Name="TreeView1" HorizontalAlignment="Left" Width="240" Padding="0" SelectedItemChanged="TreeView1_SelectedItemChanged">
                 <TreeViewItem ItemsSource="{Binding Directories}" Header="Choose directory" />
             </TreeView>
+            <Label Margin="10, 0, 0, 10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="auto" Height="20"
+                   Content="{Binding DirectorySize}" Padding="5,0" VerticalContentAlignment="Center" />
         </Grid>
         <Grid>
             <DataGrid x:Name="FilesDataGrid" HorizontalAlignment="Right" AutoGenerateColumns="False"
@@ -39,7 +41,7 @@
                     <DataGridCheckBoxColumn x:Name="CheckBox" Header="" Binding="{Binding IsChecked}" />
                     <DataGridTextColumn IsReadOnly="True" Binding="{Binding FileName}" Header="Name" Width="250" />
                     <DataGridTextColumn IsReadOnly="True" Binding="{Binding Created}" Header="Created" Width="150" />
-                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding Size}" Header="Size(kb)" Width="100" />
+                    <DataGridTextColumn IsReadOnly="True" Binding="{Binding Size}" Header="Size(Bytes)" Width="80" />
                 </DataGrid.Columns>
             </DataGrid>
             <Button Content="Compress" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="260,0,0,10"

@@ -8,6 +8,7 @@ namespace SanityArchiver.DesktopUI.Models
 {
     public class Directory
     {
+        public string Path { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="Directory"/> class.
         /// Directory constructor

@@ -23,7 +23,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
         public List<File> AllFiles { get; set; } = new List<File>();
 
-        private const string Path = "C:/Users/Kornél/codecool";
+        private const string Path = @"C:\Users\Kornél\codecool";
 
         public List<File> FilesToCompress { get; set; } = new List<File>();
 
@@ -62,6 +62,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
             var dirs = System.IO.Directory.GetDirectories(path);
 
             dir.Name = path.Substring(path.LastIndexOf("\\", StringComparison.Ordinal) + 1);
+            dir.Path = path;
 
             foreach (var fileInFiles in files)
             {
@@ -81,11 +82,11 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
             foreach (var directory in dirs)
             {
-                var d = new Directory {Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1)};
+                var d = new Directory
+                    {Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1)};
                 RecurseDir(directory, ref d);
                 dir.Directories.Add(d);
             }
-
         }
 
         /// <summary>
@@ -100,7 +101,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// <summary>
         /// It's a collection of Files
         /// </summary>
-        
+
         public ObservableCollection<File> Files
         {
             get => (ObservableCollection<File>) GetValue(FilesProperty);
@@ -198,18 +199,18 @@ namespace SanityArchiver.DesktopUI.ViewModels
             return fileExtPos >= 0 ? fileName.Substring(0, fileExtPos) : fileName;
         }
 
-        private string _boundText;
+        private string _searchText;
 
-        public string BoundText
+        public string SearchText
         {
-            get { return _boundText; }
+            get { return _searchText; }
             set
             {
-                if (_boundText != value)
+                if (_searchText != value)
                 {
-                    _boundText = value;
-                    OnPropertyChanged("BoundText");
-                    SearchEnabled = _boundText.Length >= 3;
+                    _searchText = value;
+                    OnPropertyChanged("SearchText");
+                    SearchEnabled = _searchText.Length >= 3;
                 }
             }
         }
@@ -221,7 +222,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
             get { return _foundFilesText; }
             set
             {
-                if (_foundFilesText!= value)
+                if (_foundFilesText != value)
                 {
                     _foundFilesText = value;
                     OnPropertyChanged("FoundFilesText");
@@ -243,8 +244,8 @@ namespace SanityArchiver.DesktopUI.ViewModels
                 }
             }
         }
-        
-        private bool _openEnabled = true;
+
+        private bool _openEnabled = false;
 
         public bool OpenEnabled
         {
@@ -255,6 +256,21 @@ namespace SanityArchiver.DesktopUI.ViewModels
                 {
                     _openEnabled = value;
                     OnPropertyChanged("OpenEnabled");
+                }
+            }
+        }
+
+        private string _directorySize;
+
+        public string DirectorySize
+        {
+            get { return _directorySize; }
+            set
+            {
+                if (_directorySize != value)
+                {
+                    _directorySize = value;
+                    OnPropertyChanged("DirectorySize");
                 }
             }
         }
@@ -276,7 +292,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
             ObservableCollection<File> FoundFiles = new ObservableCollection<File>();
             foreach (var file in Files)
             {
-                if (Regex.IsMatch(file.FileName, BoundText))
+                if (Regex.IsMatch(file.FileName, SearchText))
                 {
                     FoundFiles.Add(file);
                 }
