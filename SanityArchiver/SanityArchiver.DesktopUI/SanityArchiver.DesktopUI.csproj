@@ -67,9 +67,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModels\CompressWindowViewModel.cs" />
+    <Compile Include="Views\CompressWindow.xaml.cs">
+      <DependentUpon>CompressWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TxtWindow.xaml.cs">
       <DependentUpon>TxtWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\CompressWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

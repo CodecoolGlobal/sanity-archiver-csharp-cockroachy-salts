@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using SanityArchiver.DesktopUI.ViewModels;
 using Directory = SanityArchiver.Application.Models.Directory;
 using File = SanityArchiver.Application.Models.File;
@@ -58,7 +54,7 @@ namespace SanityArchiver.DesktopUI.Views
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void NameCol_mousedown(object sender, MouseButtonEventArgs e)
+        private void DirectoryTree_Mousedown(object sender, MouseButtonEventArgs e)
         {
             var tb = (TextBlock) e.OriginalSource;
             var dataObject = tb.DataContext;
@@ -70,11 +66,6 @@ namespace SanityArchiver.DesktopUI.Views
         /// <summary>
         ///     Refreshes MainWindow when any file manipulation has been made.
         /// </summary>
-        public void RefreshBrowser()
-        {
-            var mainWindow = new MainWindow();
-        }
-
         /// <summary>
         ///     Fills the DataGrid with the files from the selected Directory
         /// </summary>
@@ -86,65 +77,36 @@ namespace SanityArchiver.DesktopUI.Views
 
         private void CompressButton_Click(object sender, RoutedEventArgs e)
         {
+            
             foreach (var file in _vm.Files)
             {
-                Console.WriteLine(file.FileName);
                 if (file.IsChecked)
                 {
-                    Console.WriteLine("Found checked");
+                    Console.WriteLine(@"Found checked");
                     _vm.FilesToCompress.Add(file);
                 }
             }
-
-            OpenCompressWindows();
-        }
-
-        private void OpenCompressWindows()
-        {
-            CompressPopUp.Visibility = Visibility.Visible;
-        }
-
-        private void CompressTheFiles(IReadOnlyList<File> files)
-        {
-            using (var zip = ZipFile.Open(CompressName.Text + ".zip", ZipArchiveMode.Create))
-            {
-                foreach (var file in files) zip.CreateEntryFromFile(file.FullPath, file.FileName);
-
-                Close();
-            }
-
-            var sourceLocation =
-                "C:/Users/Kornél/codecool/4_.NET/2_TW/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" +
-                "/" + CompressName.Text + ".zip";
-            var targetLocation = files[0].DirectoryPath + "/" + CompressName.Text + ".zip";
-
-            System.IO.File.Move(sourceLocation, targetLocation);
-
-            CompressPopUp.Visibility = Visibility.Hidden;
-        }
-
-        private void ZipButton_Click(object sender, RoutedEventArgs e)
-        {
-            CompressTheFiles(_vm.FilesToCompress);
-            RefreshBrowser();
-            CompressPopUp.Visibility = Visibility.Hidden;
+            CompressWindow compressWindow = new CompressWindow(_vm.FilesToCompress);
+            compressWindow.Show();
             _vm.FilesToCompress = new List<File>();
-            _vm.ClearCheckingOnFiles();
-        }
-
-        private void CompressCloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            CompressPopUp.Visibility = Visibility.Hidden;
         }
 
         private void Encrypt(object sender, RoutedEventArgs e)
         {
             foreach (var file in _vm.Files)
+            {
                 if (file.IsChecked)
+                {
                     if (file.Extension == ".txt")
+                    {
                         _vm.FilesToEncrypt.Add(file);
+                    }
                     else
+                    {
                         Console.WriteLine(@"Not a txt file");
+                    }
+                }
+            }
 
             _vm.EncryptFiles();
             _vm.ClearCheckingOnFiles();
@@ -154,9 +116,17 @@ namespace SanityArchiver.DesktopUI.Views
         private void DecryptButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (var file in _vm.Files)
-                if (file.IsChecked)
-                    if (file.Extension == ".ENC")
-                        _vm.FilesToDecrypt.Add(file);
+            {
+                if (!file.IsChecked)
+                {
+                    continue;
+                }
+
+                if (file.Extension == ".ENC")
+                {
+                    _vm.FilesToDecrypt.Add(file);
+                }
+            }
 
             _vm.DecryptFiles(_vm.FilesToDecrypt);
         }
@@ -174,7 +144,10 @@ namespace SanityArchiver.DesktopUI.Views
         private void AttribSaveButton_Click(object sender, RoutedEventArgs e)
         {
             _vm.SelectedFile.Extension = AttribExtension.Text;
-            if (AttribHidden.IsChecked != null) _vm.SelectedFile.IsHidden = (bool) AttribHidden.IsChecked;
+            if (AttribHidden.IsChecked != null)
+            {
+                _vm.SelectedFile.IsHidden = (bool) AttribHidden.IsChecked;
+            }
 
             AttribPopUp.Visibility = Visibility.Hidden;
             _vm.SaveChangedFileData(AttribFileName.Text);
@@ -216,12 +189,10 @@ namespace SanityArchiver.DesktopUI.Views
         private void FilesDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             DataGrid dataGrid = (DataGrid) sender;
-            var row_selected = dataGrid.SelectedItem;
-            Directory directory = (Directory) TreeView1.SelectedItem;
-            Console.WriteLine(DirSize(new DirectoryInfo(directory.Path)));
+            File file = (File) dataGrid.SelectedItem;
             foreach (var vmFile in _vm.Files)
             {
-                if (vmFile.FullPath == directory.Path + @"\" + row_selected)
+                if (vmFile.FullPath == file.FullPath)
                 {
                     _vm.OpenEnabled = vmFile.Extension == ".txt";
                     _vm.SelectedFile = vmFile;
@@ -230,6 +201,11 @@ namespace SanityArchiver.DesktopUI.Views
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="d"></param>
+        /// <returns></returns>
         public static long DirSize(DirectoryInfo d)
         {
             long size = 0;
@@ -254,28 +230,42 @@ namespace SanityArchiver.DesktopUI.Views
         {
             try
             {
-                Directory directory = (Directory)TreeView1.SelectedItem;
-                long ByteSize = DirSize(new DirectoryInfo(directory.Path));
-                _vm.DirectorySize = FileSizeFormatter.FormatSize(ByteSize);
+                Directory directory = (Directory) TreeView1.SelectedItem;
+                long byteSize = DirSize(new DirectoryInfo(directory.Path));
+                _vm.DirectorySize = FileSizeFormatter.FormatSize(byteSize);
             }
-            catch (Exception ignored){}
+            catch (Exception)
+            {
+                // ignored
+            }
         }
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public static class FileSizeFormatter
     {
         // Load all suffixes in an array  
-        static readonly string[] suffixes =
-            { "Bytes", "KB", "MB", "GB", "TB", "PB" };
-        public static string FormatSize(Int64 bytes)
+        static readonly string[] Suffixes =
+            {"Bytes", "KB", "MB", "GB", "TB", "PB"};
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static string FormatSize(long bytes)
         {
             int counter = 0;
-            decimal number = (decimal)bytes;
+            decimal number = bytes;
             while (Math.Round(number / 1024) >= 1)
             {
-                number = number / 1024;
+                number /= 1024;
                 counter++;
             }
-            return string.Format("{0:n1}{1}", number, suffixes[counter]);
+
+            return string.Format("{0:n1}{1}", number, Suffixes[counter]);
         }
     }
 }

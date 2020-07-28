@@ -3,14 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:SanityArchiver.DesktopUI.ViewModels"
         xmlns:models1="clr-namespace:SanityArchiver.Application.Models;assembly=SanityArchiver.Application"
         mc:Ignorable="d"
         Title="Sanity Archiver" Height="450" Width="800">
     <Grid Loaded="Window_Loaded">
         <Grid.Resources>
             <HierarchicalDataTemplate DataType="{x:Type models1:Directory}" ItemsSource="{Binding Directories}">
-                <TextBlock Text="{Binding Path=Name}" MouseDown="NameCol_mousedown" />
+                <TextBlock Text="{Binding Path=Name}" MouseDown="DirectoryTree_Mousedown" />
             </HierarchicalDataTemplate>
         </Grid.Resources>
         <Grid>
@@ -31,8 +30,9 @@
         <Grid>
             <DataGrid x:Name="FilesDataGrid" HorizontalAlignment="Right" AutoGenerateColumns="False"
                       Margin="0,10,10,45"
-                      SelectionMode="Extended" Grid.Column="1" Width="520"
-                      SelectionChanged="FilesDataGrid_SelectionChanged">
+                      SelectionMode="Extended" Width="520"
+                      SelectionChanged="FilesDataGrid_SelectionChanged"
+                      CanUserAddRows="false">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <EventSetter Event="MouseDoubleClick" Handler="EventSetter_OnHandler" />
@@ -47,18 +47,18 @@
             </DataGrid>
             <Button Content="Compress" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="260,0,0,10"
                     Width="75"
-                    Height="25" Click="CompressButton_Click" Grid.Column="1" />
+                    Height="25" Click="CompressButton_Click" />
             <Button Content="Encrypt" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="345,0,0,10"
                     Width="75"
-                    Height="25" Click="Encrypt" Grid.Column="1" />
+                    Height="25" Click="Encrypt" />
             <Button Content="Open" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="430,0,0,10" Width="75"
-                    Height="25" Grid.Column="1" IsEnabled="{Binding OpenEnabled}" Click="Button_Click_1" />
+                    Height="25" IsEnabled="{Binding OpenEnabled}" Click="Button_Click_1" />
             <Button Content="Decrypt" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10"
                     Width="75"
-                    Height="25" Click="DecryptButton_Click" Grid.Column="1" />
+                    Height="25" Click="DecryptButton_Click" />
         </Grid>
         <Grid x:Name="AttribPopUp" Visibility="Hidden" Width="300" Height="250" HorizontalAlignment="Center"
-              VerticalAlignment="Center" Background="LightCoral" Grid.Column="1" Margin="207,84,246,85">
+              VerticalAlignment="Center" Background="LightCoral" Margin="207,84,246,85">
             <ListView>
                 <Label>FileName</Label>
                 <TextBox x:Name="AttribFileName">FileName</TextBox>
@@ -76,20 +76,5 @@
                 Cancel
             </Button>
         </Grid>
-
-        <Grid x:Name="CompressPopUp" Visibility="Hidden" Width="270" Height="150" HorizontalAlignment="Center"
-              VerticalAlignment="Center" Background="LightCoral" Grid.Column="1" Margin="222,134,261,135">
-            <TextBox x:Name="CompressName" HorizontalAlignment="Center" VerticalAlignment="Top">NameOfTheZip</TextBox>
-            <Button x:Name="ZipButton" Click="ZipButton_Click" Width="50" Height="50" HorizontalAlignment="Left"
-                    Margin="50,0,0,0">
-                Zip
-            </Button>
-            <Button x:Name="CompressCloseButton" Click="CompressCloseButton_Click" Width="50" Height="50"
-                    HorizontalAlignment="Right" Margin="0,0,50,0">
-                Cancel
-            </Button>
-        </Grid>
-
-
     </Grid>
 </Window>

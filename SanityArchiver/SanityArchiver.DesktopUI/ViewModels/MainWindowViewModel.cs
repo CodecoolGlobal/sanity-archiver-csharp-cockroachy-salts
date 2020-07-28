@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using SanityArchiver.DesktopUI.ViewModels.Commands;
@@ -19,20 +17,41 @@ namespace SanityArchiver.DesktopUI.ViewModels
     /// </summary>
     public class MainWindowViewModel : DependencyObject, INotifyPropertyChanged
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Directory Dir { get; set; } = new Directory();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<File> AllFiles { get; set; } = new List<File>();
 
         private const string Path = @"C:\Users\Kornél\codecool";
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<File> FilesToCompress { get; set; } = new List<File>();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<File> FilesToEncrypt = new List<File>();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<File> FilesToDecrypt = new List<File>();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public File SelectedFile = new File();
 
+        /// <summary>
+        /// 
+        /// </summary>
         public SearchCommand SearchCommand { get; set; }
 
 
@@ -67,14 +86,16 @@ namespace SanityArchiver.DesktopUI.ViewModels
             foreach (var fileInFiles in files)
             {
                 var fi = new FileInfo(fileInFiles);
-                var file = new File(ref _openEnabled);
-                file.FileName = System.IO.Path.GetFileName(fileInFiles);
-                file.DirectoryPath = System.IO.Path.GetDirectoryName(fileInFiles);
-                file.Size = fi.Length;
-                file.Created = fi.CreationTime;
-                file.IsChecked = false;
-                file.IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden);
-                file.Extension = System.IO.Path.GetExtension(fileInFiles);
+                var file = new File(ref _openEnabled)
+                {
+                    FileName = System.IO.Path.GetFileName(fileInFiles),
+                    DirectoryPath = System.IO.Path.GetDirectoryName(fileInFiles),
+                    Size = fi.Length,
+                    Created = fi.CreationTime,
+                    IsChecked = false,
+                    IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden),
+                    Extension = System.IO.Path.GetExtension(fileInFiles)
+                };
 
                 dir.Files.Add(file);
                 AllFiles.Add(file);
@@ -108,11 +129,6 @@ namespace SanityArchiver.DesktopUI.ViewModels
             set => SetValue(FilesProperty, value);
         }
 
-        public void CollectionChangeMethod(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            Console.WriteLine(sender);
-        }
-
         /// <summary>
         /// Registers Directories as DependencyProperty
         /// </summary>
@@ -130,6 +146,9 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private Directory _directory;
 
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void EncryptFiles()
         {
             foreach (var file in FilesToEncrypt)
@@ -142,6 +161,10 @@ namespace SanityArchiver.DesktopUI.ViewModels
             ClearCheckingOnFiles();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="files"></param>
         public void DecryptFiles(List<File> files)
         {
             foreach (var file in files)
@@ -159,6 +182,9 @@ namespace SanityArchiver.DesktopUI.ViewModels
             ClearCheckingOnFiles();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void ClearCheckingOnFiles()
         {
             foreach (var file in Files)
@@ -167,6 +193,11 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filesToEncrypt"></param>
+        /// <param name="extension"></param>
         public void ChangeFileExtension(IEnumerable<File> filesToEncrypt, string extension)
         {
             foreach (var file in filesToEncrypt)
@@ -176,6 +207,10 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newFileName"></param>
         public void SaveChangedFileData(string newFileName)
         {
             if (SelectedFile.IsHidden)
@@ -193,6 +228,11 @@ namespace SanityArchiver.DesktopUI.ViewModels
                     SelectedFile.Extension));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public string CutExtensionFromFileName(string fileName)
         {
             int fileExtPos = fileName.LastIndexOf(".", StringComparison.Ordinal);
@@ -201,6 +241,9 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
         private string _searchText;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string SearchText
         {
             get { return _searchText; }
@@ -217,6 +260,9 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
         private string _foundFilesText;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string FoundFilesText
         {
             get { return _foundFilesText; }
@@ -230,8 +276,11 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
-        private bool _searchEnabled = false;
+        private bool _searchEnabled;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool SearchEnabled
         {
             get { return _searchEnabled; }
@@ -245,11 +294,14 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
-        private bool _openEnabled = false;
+        private bool _openEnabled;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool OpenEnabled
         {
-            get { return _openEnabled; }
+            get => _openEnabled;
             set
             {
                 if (_openEnabled != value)
@@ -262,6 +314,9 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
         private string _directorySize;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string DirectorySize
         {
             get { return _directorySize; }
@@ -275,35 +330,38 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
-        public SanityArchiver.Application.Models.Directory Directory { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public Directory Directory { get; set; }
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
-            Console.WriteLine(_openEnabled);
-            if (PropertyChanged != null)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public ObservableCollection<File> SearchFile()
         {
-            ObservableCollection<File> FoundFiles = new ObservableCollection<File>();
+            ObservableCollection<File> foundFiles = new ObservableCollection<File>();
             foreach (var file in Files)
             {
                 if (Regex.IsMatch(file.FileName, SearchText))
                 {
-                    FoundFiles.Add(file);
+                    foundFiles.Add(file);
                 }
             }
 
-            FoundFilesText = $"We found {FoundFiles.Count} files matching the criteria.";
+            FoundFilesText = $"We found {foundFiles.Count} files matching the criteria.";
 
             OnPropertyChanged("FoundFilesText");
-            return FoundFiles;
+            return foundFiles;
         }
     }
 }
