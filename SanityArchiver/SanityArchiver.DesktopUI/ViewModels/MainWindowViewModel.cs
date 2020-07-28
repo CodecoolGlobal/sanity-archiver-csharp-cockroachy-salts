@@ -9,8 +9,8 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using SanityArchiver.DesktopUI.ViewModels.Commands;
 using SanityArchiver.DesktopUI.Views;
-using Directory = SanityArchiver.DesktopUI.Models.Directory;
-using File = SanityArchiver.DesktopUI.Models.File;
+using Directory = SanityArchiver.Application.Models.Directory;
+using File = SanityArchiver.Application.Models.File;
 
 namespace SanityArchiver.DesktopUI.ViewModels
 {
@@ -275,6 +275,8 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
+        public SanityArchiver.Application.Models.Directory Directory { get; set; }
+
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -299,6 +301,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
 
             FoundFilesText = $"We found {FoundFiles.Count} files matching the criteria.";
+
             OnPropertyChanged("FoundFilesText");
             return FoundFiles;
         }

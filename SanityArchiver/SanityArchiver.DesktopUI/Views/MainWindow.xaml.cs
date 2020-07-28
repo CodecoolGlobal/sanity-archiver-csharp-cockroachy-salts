@@ -9,8 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using SanityArchiver.DesktopUI.ViewModels;
-using Directory = SanityArchiver.DesktopUI.Models.Directory;
-using File = SanityArchiver.DesktopUI.Models.File;
+using Directory = SanityArchiver.Application.Models.Directory;
+using File = SanityArchiver.Application.Models.File;
 
 namespace SanityArchiver.DesktopUI.Views
 {

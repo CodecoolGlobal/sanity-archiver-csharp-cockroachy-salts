@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace SanityArchiver.DesktopUI.Models
+namespace SanityArchiver.Application.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Directory
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public string Path { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Directory"/> class.
         /// Directory constructor
@@ -18,27 +21,21 @@ namespace SanityArchiver.DesktopUI.Models
             Files = new List<File>();
             Directories = new List<Directory>();
         }
+
         /// <summary>
         /// Getter and setter for List of files
         /// </summary>
-        public List<File> Files { get; private set; }
+        public List<File> Files { get; }
+
         /// <summary>
         /// Getter and setter for list of directories
         /// </summary>
-        public List<Directory> Directories { get; private set; }
+        public List<Directory> Directories { get; }
+
         /// <summary>
         /// Getter and setter for dir name
         /// </summary>
         public string Name { get; set; }
-        /// <summary>
-        /// File counter
-        /// </summary>
-        public int FileCount => Files.Count;
-
-        /// <summary>
-        /// Dir counter
-        /// </summary>
-        public int DirectoryCount => Directories.Count;
 
         /// <summary>
         /// To string method for dir names

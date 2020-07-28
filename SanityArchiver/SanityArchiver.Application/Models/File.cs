@@ -2,33 +2,45 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
-using SanityArchiver.DesktopUI.Annotations;
 
-namespace SanityArchiver.DesktopUI.Models
+namespace SanityArchiver.Application.Models
 {
     /// <summary>
     /// File class
     /// </summary>
     public class File : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="File"/> class>
+        /// </summary>
+        /// <param name="openable"></param>
         public File(ref bool openable)
         {
             Openable = openable;
         }
 
-        public File(){}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="File"/> class.
+        /// </summary>
+        public File()
+        {
+        }
+
         /// <summary>
         /// Path of the directory which holds the file
         /// </summary>
         public string DirectoryPath { get; set; }
+
         /// <summary>
         /// Name of the file
         /// </summary>
         public string FileName { get; set; }
+
         /// <summary>
         /// The extension of the file as string
         /// </summary>
         public string Extension { get; set; }
+
         /// <summary>
         /// Size of the file as double
         /// </summary>
@@ -39,21 +51,27 @@ namespace SanityArchiver.DesktopUI.Models
         /// </summary>
         private bool _isChecked;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsChecked
         {
-            get { return _isChecked;}
+            get => _isChecked;
             set
+            {
+                if (_isChecked != value)
                 {
-                    if (_isChecked != value)
-                    {
-                        _isChecked = value;
-                        OnPropertyChanged("IsChecked");
-                    }
+                    _isChecked = value;
+                    OnPropertyChanged();
                 }
-            
+            }
         }
 
-        public bool Openable;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool Openable { get; set; }
+
         /// <summary>
         /// True if the file has the hidden attribute
         /// </summary>
@@ -63,6 +81,7 @@ namespace SanityArchiver.DesktopUI.Models
         /// Date of creation in DateTime
         /// </summary>
         public DateTime Created { get; set; }
+
         /// <summary>
         /// Full path built from the Directory path + Filename
         /// </summary>
@@ -77,13 +96,22 @@ namespace SanityArchiver.DesktopUI.Models
             return FileName;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotifyPropertyChangedInvocator]
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName"></param>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (this.Extension == ".txt") Openable = true;
-            Console.WriteLine(Openable);
+            if (Extension == ".txt")
+            {
+                Openable = true;
+            }
+
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
