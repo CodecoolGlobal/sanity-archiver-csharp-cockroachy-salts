@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO.Compression;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using SanityArchiver.DesktopUI.Models;
 using SanityArchiver.DesktopUI.ViewModels;
 
@@ -201,5 +204,28 @@ namespace SanityArchiver.DesktopUI.Views
             ShowFilesInGrid(_vm.SearchFile());
         }
 
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            TxtWindow txtWindow = new TxtWindow();
+            txtWindow.TextBlock.Text = System.IO.File.ReadAllText(_vm.SelectedFile.FullPath);
+            txtWindow.Show();
+        }
+
+        private void FilesDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DataGrid dataGrid = (DataGrid) sender;
+            var row_selected = dataGrid.SelectedItem;
+            var dir_selected = TreeView1.SelectedItem;
+            foreach (var vmFile in _vm.Files)
+            {
+                string[] path = vmFile.FullPath.ToString().Split('\\');
+                if (path[path.Length - 2] + "\\" + path[path.Length - 1] == $"{dir_selected}\\{row_selected}")
+                {
+                    _vm.OpenEnabled = vmFile.Extension == ".txt";
+                    _vm.SelectedFile = vmFile;
+                    return;
+                }
+            }
+        }
     }
 }

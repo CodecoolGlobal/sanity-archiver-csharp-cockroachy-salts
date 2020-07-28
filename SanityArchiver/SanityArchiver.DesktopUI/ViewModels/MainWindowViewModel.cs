@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -65,17 +66,14 @@ namespace SanityArchiver.DesktopUI.ViewModels
             foreach (var fileInFiles in files)
             {
                 var fi = new FileInfo(fileInFiles);
-
-                var file = new File
-                {
-                    FileName = System.IO.Path.GetFileName(fileInFiles),
-                    DirectoryPath = System.IO.Path.GetDirectoryName(fileInFiles),
-                    Size = fi.Length,
-                    Created = fi.CreationTime,
-                    IsChecked = false,
-                    IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden),
-                    Extension = System.IO.Path.GetExtension(fileInFiles),
-                };
+                var file = new File(ref _openEnabled);
+                file.FileName = System.IO.Path.GetFileName(fileInFiles);
+                file.DirectoryPath = System.IO.Path.GetDirectoryName(fileInFiles);
+                file.Size = fi.Length;
+                file.Created = fi.CreationTime;
+                file.IsChecked = false;
+                file.IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden);
+                file.Extension = System.IO.Path.GetExtension(fileInFiles);
 
                 dir.Files.Add(file);
                 AllFiles.Add(file);
@@ -102,10 +100,16 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// <summary>
         /// It's a collection of Files
         /// </summary>
+        
         public ObservableCollection<File> Files
         {
             get => (ObservableCollection<File>) GetValue(FilesProperty);
             set => SetValue(FilesProperty, value);
+        }
+
+        public void CollectionChangeMethod(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            Console.WriteLine(sender);
         }
 
         /// <summary>
@@ -210,7 +214,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
-        private string _foundFilesText = "TEST";
+        private string _foundFilesText;
 
         public string FoundFilesText
         {
@@ -239,15 +243,30 @@ namespace SanityArchiver.DesktopUI.ViewModels
                 }
             }
         }
+        
+        private bool _openEnabled = true;
+
+        public bool OpenEnabled
+        {
+            get { return _openEnabled; }
+            set
+            {
+                if (_openEnabled != value)
+                {
+                    _openEnabled = value;
+                    OnPropertyChanged("OpenEnabled");
+                }
+            }
+        }
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
+            Console.WriteLine(_openEnabled);
             if (PropertyChanged != null)
             {
-                Console.WriteLine(propertyName);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
         }

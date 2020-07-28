@@ -1,13 +1,22 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.CompilerServices;
+using SanityArchiver.DesktopUI.Annotations;
 
 namespace SanityArchiver.DesktopUI.Models
 {
     /// <summary>
     /// File class
     /// </summary>
-    public class File
+    public class File : INotifyPropertyChanged
     {
+        public File(ref bool openable)
+        {
+            Openable = openable;
+        }
+
+        public File(){}
         /// <summary>
         /// Path of the directory which holds the file
         /// </summary>
@@ -28,7 +37,23 @@ namespace SanityArchiver.DesktopUI.Models
         /// <summary>
         /// Property for the checkboxes in the DataGrid
         /// </summary>
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+
+        public bool IsChecked
+        {
+            get { return _isChecked;}
+            set
+                {
+                    if (_isChecked != value)
+                    {
+                        _isChecked = value;
+                        OnPropertyChanged("IsChecked");
+                    }
+                }
+            
+        }
+
+        public bool Openable;
         /// <summary>
         /// True if the file has the hidden attribute
         /// </summary>
@@ -50,6 +75,16 @@ namespace SanityArchiver.DesktopUI.Models
         public override string ToString()
         {
             return FileName;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (this.Extension == ".txt") Openable = true;
+            Console.WriteLine(Openable);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
