@@ -43,6 +43,7 @@ namespace SanityArchiver.DesktopUI.Views
         public AttributeWindow(File file)
         {
             _file = file;
+            file.FileName = CutExtensionFromFileName(file.FileName);
             InitializeComponent();
             AttributeListView.DataContext = file;
         }
@@ -86,7 +87,7 @@ namespace SanityArchiver.DesktopUI.Views
 
         private void AttribSaveButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Close();
         }
     }
 }

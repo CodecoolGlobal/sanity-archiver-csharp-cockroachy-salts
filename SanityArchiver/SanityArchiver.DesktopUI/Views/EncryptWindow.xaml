@@ -5,11 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SanityArchiver.DesktopUI.Views"
         mc:Ignorable="d"
-        Title="EncryptWindow" Height="450" Width="800">
+        Title="File Encryption" Height="150" Width="400">
     <Grid>
-        <Label Content="File Encrypt" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" />
-        <Label Content="File Name:" HorizontalAlignment="Left" Margin="20,40,0,0" VerticalAlignment="Top" />
-        <TextBox Text="Are you sure to encrypt the file?" TextChanged="TextBoxBase_OnTextChanged" x:Name="FileName" HorizontalAlignment="Left" Height="25" Margin="100,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="282" />
+        <Label Content="File Encryption" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" />
+        <TextBlock HorizontalAlignment="Center" Height="25" Margin="0,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="282" Text="Are you sure you want to encrypt the chosen file?" />
         <Button Content="Encrypt it!" IsEnabled="{Binding SaveBtnEnabled}" HorizontalAlignment="Left" Margin="20,0,0,10" VerticalAlignment="Bottom" Width="75" Click="Button_Click" />
         <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,20,10" VerticalAlignment="Bottom" Width="75" Click="CancelButton_Click" />
     </Grid>

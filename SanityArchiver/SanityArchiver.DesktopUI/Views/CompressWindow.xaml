@@ -4,9 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="File Compress" Height="150" Width="400" Loaded="Window_Loaded">
+        Title="File Compression" Height="150" Width="400" Loaded="Window_Loaded">
     <Grid>
-        <Label Content="File Compress" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" />
+        <Label Content="File Compression" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" />
         <Label Content="File Name:" HorizontalAlignment="Left" Margin="20,40,0,0" VerticalAlignment="Top" />
         <TextBox Text="{Binding Path=FileName, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" TextChanged="TextBoxBase_OnTextChanged" x:Name="FileName" HorizontalAlignment="Left" Height="25" Margin="100,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="282" />
         <Button Content="Save" IsEnabled="{Binding SaveBtnEnabled}" HorizontalAlignment="Left" Margin="20,0,0,10" VerticalAlignment="Bottom" Width="75" Click="SaveButton_Click" />

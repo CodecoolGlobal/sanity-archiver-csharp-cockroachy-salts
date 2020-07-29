@@ -54,8 +54,8 @@ namespace SanityArchiver.DesktopUI.Views
             }
 
             var sourceLocation =
-                "C:/Users/DobiTamas/source/repos/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" +
-                "/" + FileName.Text + ".zip";
+                "C:\\Users\\Kornél\\codecool\\4_.NET\\2_TW\\sanity-archiver-csharp-cockroachy-salts\\SanityArchiver\\SanityArchiver.DesktopUI\\bin\\Debug" +
+                "\\" + FileName.Text + ".zip";
             var targetLocation = _files[0].DirectoryPath + "/" + FileName.Text + ".zip";
 
             System.IO.File.Move(sourceLocation, targetLocation);

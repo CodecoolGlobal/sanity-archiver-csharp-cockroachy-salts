@@ -27,7 +27,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// </summary>
         public List<File> AllFiles { get; set; } = new List<File>();
 
-        private const string Path = @"C:\Users\DobiTamas\Desktop\Teszt";
+        private const string Path = @"C:\Users\Kornél\codecool";
 
         /// <summary>
         ///

@@ -89,7 +89,7 @@ namespace SanityArchiver.DesktopUI.Views
 
             if (_vm.FilesToCompress.Count < 1)
             {
-                new ErrorWindow("Select atlest 1 file to compress!").ShowDialog();
+                new ErrorWindow("Please select at lest 1 file to compress!").ShowDialog();
                 return;
             }
             CompressWindow compressWindow = new CompressWindow(_vm.FilesToCompress);
@@ -116,7 +116,7 @@ namespace SanityArchiver.DesktopUI.Views
                 _vm.FilesToEncrypt = new List<File>();
             } else
             {
-                new ErrorWindow("Select a .txt file").ShowDialog();
+                new ErrorWindow("Please select a .txt file to encrypt!").ShowDialog();
                 return;
             }
             _vm.ClearCheckingOnFiles();
