@@ -86,6 +86,12 @@ namespace SanityArchiver.DesktopUI.Views
                     _vm.FilesToCompress.Add(file);
                 }
             }
+
+            if (_vm.FilesToCompress.Count < 1)
+            {
+                new ErrorWindow().Show();
+                return;
+            }
             CompressWindow compressWindow = new CompressWindow(_vm.FilesToCompress);
             compressWindow.Show();
             _vm.FilesToCompress = new List<File>();
@@ -190,6 +196,7 @@ namespace SanityArchiver.DesktopUI.Views
         {
             DataGrid dataGrid = (DataGrid) sender;
             File file = (File) dataGrid.SelectedItem;
+            if(file == null) return;
             foreach (var vmFile in _vm.Files)
             {
                 if (vmFile.FullPath == file.FullPath)

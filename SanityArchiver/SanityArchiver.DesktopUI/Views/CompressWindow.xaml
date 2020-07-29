@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="CompressWindow" Height="150" Width="400" Loaded="Window_Loaded">
+        Title="File Compress" Height="150" Width="400" Loaded="Window_Loaded">
     <Grid>
         <Label Content="File Compress" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top"/>
         <Label Content="File Name:" HorizontalAlignment="Left" Margin="20,40,0,0" VerticalAlignment="Top"/>

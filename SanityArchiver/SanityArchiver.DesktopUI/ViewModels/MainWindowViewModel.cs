@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -94,7 +95,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
                     Created = fi.CreationTime,
                     IsChecked = false,
                     IsHidden = fi.Attributes.HasFlag(FileAttributes.Hidden),
-                    Extension = System.IO.Path.GetExtension(fileInFiles)
+                    Extension = System.IO.Path.GetExtension(fileInFiles),
                 };
 
                 dir.Files.Add(file);
@@ -119,15 +120,37 @@ namespace SanityArchiver.DesktopUI.ViewModels
             set => SetValue(DirectoriesProperty, value);
         }
 
+
+        private ObservableCollection<File> _files = new ObservableCollection<File>();
+        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ObservableCollection<File> Files
+        {
+            get { return _files; }
+            set
+            {
+                if (_files != value)
+                {
+                    _files = value;
+                    OnPropertyChanged("Files");
+                }
+            }
+        }
+
+        /*
         /// <summary>
         /// It's a collection of Files
         /// </summary>
-
+        
         public ObservableCollection<File> Files
         {
             get => (ObservableCollection<File>) GetValue(FilesProperty);
             set => SetValue(FilesProperty, value);
         }
+        */
 
         /// <summary>
         /// Registers Directories as DependencyProperty
