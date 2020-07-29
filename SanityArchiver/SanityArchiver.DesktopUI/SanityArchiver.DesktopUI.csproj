@@ -67,9 +67,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModels\AttributeWindowViewModel.cs" />
     <Compile Include="ViewModels\CompressWindowViewModel.cs" />
+    <Compile Include="Views\AttributeWindow.xaml.cs">
+      <DependentUpon>AttributeWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CompressWindow.xaml.cs">
       <DependentUpon>CompressWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EncryptWindow.xaml.cs">
+      <DependentUpon>EncryptWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ErrorWindow.xaml.cs">
       <DependentUpon>ErrorWindow.xaml</DependentUpon>
@@ -77,7 +84,15 @@
     <Compile Include="Views\TxtWindow.xaml.cs">
       <DependentUpon>TxtWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\AttributeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\CompressWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\EncryptWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

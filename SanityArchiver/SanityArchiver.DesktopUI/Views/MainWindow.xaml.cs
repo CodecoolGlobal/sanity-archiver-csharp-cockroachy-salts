@@ -89,11 +89,11 @@ namespace SanityArchiver.DesktopUI.Views
 
             if (_vm.FilesToCompress.Count < 1)
             {
-                new ErrorWindow().Show();
+                new ErrorWindow("Select atlest 1 file to compress!").ShowDialog();
                 return;
             }
             CompressWindow compressWindow = new CompressWindow(_vm.FilesToCompress);
-            compressWindow.Show();
+            compressWindow.ShowDialog();
             _vm.FilesToCompress = new List<File>();
         }
 
@@ -107,14 +107,18 @@ namespace SanityArchiver.DesktopUI.Views
                     {
                         _vm.FilesToEncrypt.Add(file);
                     }
-                    else
-                    {
-                        Console.WriteLine(@"Not a txt file");
-                    }
                 }
             }
-
-            _vm.EncryptFiles();
+            if(_vm.FilesToEncrypt.Count == 1)
+            {
+                EncryptWindow encryptWindow = new EncryptWindow(_vm.FilesToEncrypt);
+                encryptWindow.ShowDialog();
+                _vm.FilesToEncrypt = new List<File>();
+            } else
+            {
+                new ErrorWindow("Select a .txt file").ShowDialog();
+                return;
+            }
             _vm.ClearCheckingOnFiles();
         }
 
@@ -123,55 +127,33 @@ namespace SanityArchiver.DesktopUI.Views
         {
             foreach (var file in _vm.Files)
             {
-                if (!file.IsChecked)
+                if (file.IsChecked)
                 {
-                    continue;
+                    if(file.Extension == ".ENC")
+                    {
+                        _vm.FilesToDecrypt.Add(file);
+                    }
                 }
 
-                if (file.Extension == ".ENC")
-                {
-                    _vm.FilesToDecrypt.Add(file);
-                }
             }
-
-            _vm.DecryptFiles(_vm.FilesToDecrypt);
-        }
-
-
-        private void ChangeFileAttributesWindow()
-        {
-            AttribPopUp.Visibility = Visibility.Visible;
-            AttribFileName.Text = _vm.CutExtensionFromFileName(_vm.SelectedFile.FileName);
-            AttribExtension.Text = _vm.SelectedFile.Extension;
-            AttribHidden.IsChecked = _vm.SelectedFile.IsHidden;
-        }
-
-
-        private void AttribSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            _vm.SelectedFile.Extension = AttribExtension.Text;
-            if (AttribHidden.IsChecked != null)
+            if(_vm.FilesToDecrypt.Count <=0)
             {
-                _vm.SelectedFile.IsHidden = (bool) AttribHidden.IsChecked;
+                new ErrorWindow("Please select .ENC files!").ShowDialog();
+            }else
+            {
+                _vm.DecryptFiles(_vm.FilesToDecrypt);
+                _vm.FilesToDecrypt = new List<File>();
             }
-
-            AttribPopUp.Visibility = Visibility.Hidden;
-            _vm.SaveChangedFileData(AttribFileName.Text);
+            
         }
 
-        /// <summary>
-        ///     Saves all the new attributes from the Attribute changer window.
-        /// </summary>
-        private void AttribCloseButton_OnClickCloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            _vm.SelectedFile = new File();
-            AttribPopUp.Visibility = Visibility.Hidden;
-        }
 
         private void EventSetter_OnHandler(object sender, MouseButtonEventArgs e)
         {
             _vm.SelectedFile = FilesDataGrid.SelectedItem as File;
-            ChangeFileAttributesWindow();
+            AttributeWindow attributeWindow = new AttributeWindow(_vm.SelectedFile);
+            attributeWindow.ShowDialog();
+            
         }
 
         private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -189,7 +171,7 @@ namespace SanityArchiver.DesktopUI.Views
         {
             TxtWindow txtWindow = new TxtWindow();
             txtWindow.TextBlock.Text = System.IO.File.ReadAllText(_vm.SelectedFile.FullPath);
-            txtWindow.Show();
+            txtWindow.ShowDialog();
         }
 
         private void FilesDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -8,9 +8,10 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorWindow"/> class.
         /// </summary>
-        public ErrorWindow()
+        public ErrorWindow(string ErrorMessage)
         {
             InitializeComponent();
+            ErrorMessageText.Text = ErrorMessage;
         }
 
         private void Button_Click(object sender, System.Windows.RoutedEventArgs e)

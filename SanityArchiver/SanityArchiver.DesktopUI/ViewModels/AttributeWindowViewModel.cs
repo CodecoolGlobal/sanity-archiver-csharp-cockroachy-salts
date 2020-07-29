@@ -1,17 +1,18 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SanityArchiver.DesktopUI.ViewModels
 {
-    /// <summary>
-    ///
-    /// </summary>
-    public class CompressWindowViewModel : INotifyPropertyChanged
+    public class AttributeWindowViewModel : INotifyPropertyChanged
     {
         private string _fileName;
+        private string _extension;
+        private bool _isHidden;
 
-        /// <summary>
-        ///
-        /// </summary>
         public string FileName
         {
             get { return _fileName; }
@@ -26,11 +27,34 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
+        public string Extension
+        {
+            get { return _extension; }
+            set
+            {
+                if (_extension != value)
+                {
+                    _extension = value;
+                    OnPropertyChanged("Extension");
+                }
+            }
+        }
+
+        public bool IsHidden
+        {
+            get { return _isHidden; }
+            set
+            {
+                if (_isHidden != value)
+                {
+                    _isHidden = value;
+                    OnPropertyChanged("IsHidden");
+                }
+            }
+        }
+
         private bool _saveBtnEnabled;
 
-        /// <summary>
-        ///
-        /// </summary>
         public bool SaveBtnEnabled
         {
             get { return _saveBtnEnabled; }
@@ -44,9 +68,6 @@ namespace SanityArchiver.DesktopUI.ViewModels
             }
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)

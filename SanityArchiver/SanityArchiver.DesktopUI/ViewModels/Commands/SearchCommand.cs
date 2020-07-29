@@ -4,14 +4,15 @@ using System.Windows.Input;
 namespace SanityArchiver.DesktopUI.ViewModels.Commands
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class SearchCommand : ICommand
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public static MainWindowViewModel MainWindowViewModel { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchCommand"/> class.
         /// </summary>
@@ -20,8 +21,9 @@ namespace SanityArchiver.DesktopUI.ViewModels.Commands
         {
             MainWindowViewModel = mainWindowViewModel;
         }
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="parameter"></param>
         /// <returns></returns>
@@ -31,7 +33,7 @@ namespace SanityArchiver.DesktopUI.ViewModels.Commands
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="parameter"></param>
         public void Execute(object parameter)
@@ -40,7 +42,7 @@ namespace SanityArchiver.DesktopUI.ViewModels.Commands
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public event EventHandler CanExecuteChanged;
     }

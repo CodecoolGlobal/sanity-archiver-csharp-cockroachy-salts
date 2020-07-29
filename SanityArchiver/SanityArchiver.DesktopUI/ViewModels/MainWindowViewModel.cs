@@ -1,13 +1,12 @@
-﻿using System;
+﻿using SanityArchiver.DesktopUI.ViewModels.Commands;
+using SanityArchiver.DesktopUI.Views;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
-using SanityArchiver.DesktopUI.ViewModels.Commands;
-using SanityArchiver.DesktopUI.Views;
 using Directory = SanityArchiver.Application.Models.Directory;
 using File = SanityArchiver.Application.Models.File;
 
@@ -19,42 +18,41 @@ namespace SanityArchiver.DesktopUI.ViewModels
     public class MainWindowViewModel : DependencyObject, INotifyPropertyChanged
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public Directory Dir { get; set; } = new Directory();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public List<File> AllFiles { get; set; } = new List<File>();
 
-        private const string Path = @"C:\Users\Kornél\codecool";
+        private const string Path = @"C:\Users\DobiTamas\Desktop\Teszt";
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public List<File> FilesToCompress { get; set; } = new List<File>();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public List<File> FilesToEncrypt = new List<File>();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public List<File> FilesToDecrypt = new List<File>();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public File SelectedFile = new File();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public SearchCommand SearchCommand { get; set; }
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
@@ -63,7 +61,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         public MainWindowViewModel()
         {
             Seed();
-            Directories = new ObservableCollection<Directory>(new List<Directory> {Dir});
+            Directories = new ObservableCollection<Directory>(new List<Directory> { Dir });
             Files = new ObservableCollection<File>(AllFiles);
             SearchCommand = new SearchCommand(this);
         }
@@ -71,7 +69,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private void Seed()
         {
             _directory = Dir;
-            _directory = new Directory {Name = "codecool"};
+            _directory = new Directory { Name = "Teszt" };
             RecurseDir(Path, ref _directory);
             Dir = _directory;
         }
@@ -105,7 +103,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
             foreach (var directory in dirs)
             {
                 var d = new Directory
-                    {Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1)};
+                { Name = directory.Substring(directory.LastIndexOf("\\", StringComparison.Ordinal) + 1) };
                 RecurseDir(directory, ref d);
                 dir.Directories.Add(d);
             }
@@ -116,16 +114,14 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// </summary>
         public ObservableCollection<Directory> Directories
         {
-            get => (ObservableCollection<Directory>) GetValue(DirectoriesProperty);
+            get => (ObservableCollection<Directory>)GetValue(DirectoriesProperty);
             set => SetValue(DirectoriesProperty, value);
         }
 
-
         private ObservableCollection<File> _files = new ObservableCollection<File>();
-        
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public ObservableCollection<File> Files
         {
@@ -144,7 +140,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         /// <summary>
         /// It's a collection of Files
         /// </summary>
-        
+
         public ObservableCollection<File> Files
         {
             get => (ObservableCollection<File>) GetValue(FilesProperty);
@@ -168,9 +164,8 @@ namespace SanityArchiver.DesktopUI.ViewModels
 
         private Directory _directory;
 
-
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public void EncryptFiles()
         {
@@ -185,7 +180,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="files"></param>
         public void DecryptFiles(List<File> files)
@@ -201,12 +196,12 @@ namespace SanityArchiver.DesktopUI.ViewModels
                 {
                 }
             }
-
+            
             ClearCheckingOnFiles();
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public void ClearCheckingOnFiles()
         {
@@ -217,7 +212,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="filesToEncrypt"></param>
         /// <param name="extension"></param>
@@ -231,7 +226,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="newFileName"></param>
         public void SaveChangedFileData(string newFileName)
@@ -252,7 +247,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
@@ -265,7 +260,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private string _searchText;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public string SearchText
         {
@@ -284,7 +279,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private string _foundFilesText;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public string FoundFilesText
         {
@@ -302,7 +297,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private bool _searchEnabled;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public bool SearchEnabled
         {
@@ -320,7 +315,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private bool _openEnabled;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public bool OpenEnabled
         {
@@ -338,7 +333,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         private string _directorySize;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public string DirectorySize
         {
@@ -354,7 +349,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public Directory Directory { get; set; }
 
@@ -367,7 +362,7 @@ namespace SanityArchiver.DesktopUI.ViewModels
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public ObservableCollection<File> SearchFile()

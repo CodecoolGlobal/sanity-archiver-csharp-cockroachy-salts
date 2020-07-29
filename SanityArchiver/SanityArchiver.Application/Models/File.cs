@@ -52,7 +52,7 @@ namespace SanityArchiver.Application.Models
         private bool _isChecked;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public bool IsChecked
         {
@@ -68,7 +68,7 @@ namespace SanityArchiver.Application.Models
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public bool Openable { get; set; }
 
@@ -97,12 +97,12 @@ namespace SanityArchiver.Application.Models
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="propertyName"></param>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

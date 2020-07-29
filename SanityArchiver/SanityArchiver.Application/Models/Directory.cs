@@ -3,12 +3,12 @@
 namespace SanityArchiver.Application.Models
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class Directory
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public string Path { get; set; }
 

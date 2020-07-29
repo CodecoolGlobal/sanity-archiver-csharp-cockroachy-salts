@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Error" Height="125" Width="200">
     <Grid>
-        <TextBox Width="180" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Center" TextAlignment="Center" Margin="10">Please select at least 1 file to compress!</TextBox>
-        <Button Content="Ok" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="74" Margin="0, 0, 0, 10" Click="Button_Click"/>
+        <TextBox x:Name="ErrorMessageText" Width="180" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Center" TextAlignment="Center" Margin="10"></TextBox>
+        <Button Content="Ok" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="74" Margin="0, 0, 0, 10" Click="Button_Click" />
     </Grid>
 </Window>

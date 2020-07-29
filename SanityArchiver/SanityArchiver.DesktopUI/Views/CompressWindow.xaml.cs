@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using SanityArchiver.Application.Models;
+using SanityArchiver.DesktopUI.ViewModels;
+using System.Collections.Generic;
 using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
-using SanityArchiver.Application.Models;
-using SanityArchiver.DesktopUI.ViewModels;
 
 namespace SanityArchiver.DesktopUI.Views
 {
@@ -15,7 +15,7 @@ namespace SanityArchiver.DesktopUI.Views
         private CompressWindowViewModel _vm;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public CompressWindowViewModel Vm
         {
@@ -28,6 +28,7 @@ namespace SanityArchiver.DesktopUI.Views
         }
 
         private List<File> _files;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CompressWindow"/> class.
         /// </summary>
@@ -43,7 +44,6 @@ namespace SanityArchiver.DesktopUI.Views
             Close();
         }
 
-
         private void CompressTheFiles()
         {
             using (var zip = ZipFile.Open(FileName.Text + ".zip", ZipArchiveMode.Create))
@@ -54,7 +54,7 @@ namespace SanityArchiver.DesktopUI.Views
             }
 
             var sourceLocation =
-                "C:/Users/Kornél/codecool/4_.NET/2_TW/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" +
+                "C:/Users/DobiTamas/source/repos/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" +
                 "/" + FileName.Text + ".zip";
             var targetLocation = _files[0].DirectoryPath + "/" + FileName.Text + ".zip";
 
