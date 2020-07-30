@@ -1,220 +1,260 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
-using System.IO.Compression;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SanityArchiver.DesktopUI.ViewModels;
-using Directory = SanityArchiver.DesktopUI.Models.Directory;
-using File = SanityArchiver.DesktopUI.Models.File;
 
 namespace SanityArchiver.DesktopUI.Views
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow
+    public partial class MainWindow : Window
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MainWindow"/> class.
-        /// </summary>
+        private DataGrid DataGrid;
+        private List<DirectoryItemViewModel> Files = new List<DirectoryItemViewModel>();
+
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new DirectoryStructureViewModel();
         }
 
-        private MainWindowViewModel _vm;
-
-        /// <summary>
-        /// We need this for the Folder Tree
-        /// </summary>
-        public MainWindowViewModel Vm
+        private void FolderView_MouseDown(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            get => this._vm;
-            set
+            FileView.ItemsSource =
+                DirectoryStructure.GetDirectoryFiles(((DirectoryItemViewModel)FolderView.SelectedItem).FullPath);
+            try
             {
-                _vm = value;
-                this.DataContext = _vm;
+                DirectoryItemViewModel directory = (DirectoryItemViewModel)FolderView.SelectedItem;
+                long byteSize = DirSize(new DirectoryInfo(directory.FullPath));
+                DirectorySize.Content = $"The size of the folder is: {FileSizeFormatter.FormatSize(byteSize)}";
             }
-        }
-        /// <summary>
-        /// When the Main Window is loaded it loads up "VM" with a List of Directories from the path(uses the recurseDir func)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            Vm = new MainWindowViewModel();
-        }
-
-
-        /// <summary>
-        /// Controls the browsing trough the directory tree
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-
-        private void NameCol_mousedown(object sender, MouseButtonEventArgs e)
-        {
-            var tb = (TextBlock)e.OriginalSource;
-            var dataObject = tb.DataContext;
-            var dataSource = (Directory)dataObject;
-
-            ShowFilesInGrid(dataSource.Files);
-
-        }
-        /// <summary>
-        /// Refreshes MainWindow when any file manipulation has been made.
-        /// </summary>
-        public void RefreshBrowser()
-        {
-            var mainWindow = new MainWindow();
-        }
-
-        /// <summary>
-        /// Fills the DataGrid with the files from the selected Directory
-        /// </summary>
-        /// <param name="files"></param>
-
-        private void ShowFilesInGrid(IEnumerable<File> files)
-        {
-            FilesDataGrid.ItemsSource = files;
+            catch (Exception)
+            {
+                DirectorySize.Content = "Can't evaluate folder's size.";
+            }
         }
 
         private void CompressButton_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var file in _vm.Files)
+            List<DirectoryItemViewModel> files =
+                DirectoryStructure.GetCheckedFiles((List<DirectoryItemViewModel>)FileView.ItemsSource);
+            if (files == null || files.Count == 0)
             {
-                Console.WriteLine(file.FileName);
-                if (file.IsChecked)
-                {
-                    Console.WriteLine("Found checked");
-                    _vm._filesToCompress.Add(file);
-                }
+                return;
             }
-            OpenCompressWindows();
+            CompressWindow compressWindow = new CompressWindow(files);
+            compressWindow.Closing += Refresh;
+            compressWindow.ShowDialog();
         }
 
-        private void OpenCompressWindows()
+        private void EncryptButton_Click(object sender, RoutedEventArgs e)
         {
-            CompressPopUp.Visibility = Visibility.Visible;
-            
-        }
-        private void CompressTheFiles(IReadOnlyList<File> files)
-        {
-            using (var zip = ZipFile.Open(CompressName.Text + ".zip", ZipArchiveMode.Create))
+            DirectoryItemViewModel file = (DirectoryItemViewModel)DataGrid.SelectedItem;
+            if (file == null)
             {
-                foreach (var file in files)
-                {
-                    zip.CreateEntryFromFile(file.FullPath, file.FileName);
-                }
-
-                Close();
+                return;
             }
-
-            string sourceLocation = "C:/Users/Tamás/source/repos/sanity-archiver-csharp-cockroachy-salts/SanityArchiver/SanityArchiver.DesktopUI/bin/Debug" + "/" + CompressName.Text + ".zip";
-            string targetLocation = files[0].DirectoryPath + "/" + CompressName.Text + ".zip";
-
-            System.IO.File.Move(sourceLocation, targetLocation);
-
-            CompressPopUp.Visibility = Visibility.Hidden;
-
-
-        }
-        private void ZipButton_Click(object sender, RoutedEventArgs e)
-        {
-            CompressTheFiles(_vm._filesToCompress);
-            RefreshBrowser();
-            CompressPopUp.Visibility = Visibility.Hidden;
-            _vm._filesToCompress = new List<File>();
-            _vm.ClearCheckingOnFiles();
+            EncryptWindow encryptWindow = new EncryptWindow(file);
+            encryptWindow.Closing += Refresh;
+            encryptWindow.ShowDialog();
         }
 
-        private void CompressCloseButton_Click(object sender, RoutedEventArgs e)
+        private void Refresh(object sender, CancelEventArgs e)
         {
-            CompressPopUp.Visibility = Visibility.Hidden;
+            FolderView_MouseDown(null, null);
         }
 
-        private void Encrypt(object sender, RoutedEventArgs e)
+        private void FileView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            foreach (var file in _vm.Files)
+            DirectoryItemViewModel file = (DirectoryItemViewModel)DataGrid.SelectedItem;
+            if (file == null)
             {
-                if (file.IsChecked)
-                {
-                    if (file.Extension == ".txt")
-                    {
-                        _vm._filesToEncrypt.Add(file);
-                    }
-                    else
-                    {
-                        Console.WriteLine(@"Not a txt file");
-                    }
-                }
+                return;
             }
-            _vm.EncryptFiles();
-            _vm.ClearCheckingOnFiles();
+            OpenButton.IsEnabled = file.Extension == ".txt";
+            EncryptButton.IsEnabled = file.Extension == ".txt";
+            DecryptButton.IsEnabled = file.Extension == ".ENC";
         }
-
-        
 
         private void DecryptButton_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var file in _vm.Files)
+            DirectoryItemViewModel file = (DirectoryItemViewModel)DataGrid.SelectedItem;
+            File.Decrypt(file.FullPath);
+            string newPath = Path.ChangeExtension(file.FullPath, ".txt");
+            File.Move(file.FullPath,
+                newPath);
+            File.Move(newPath, $"{newPath.Substring(0, newPath.Length - file.Extension.Length)}_" +
+                               $"{DateTime.Now.Year}_{DateTime.Now.Month}_{DateTime.Now.Day}_{DateTime.Now.Hour}_{DateTime.Now.Minute}.txt");
+            FolderView_MouseDown(null, null);
+        }
+
+        private void DataGridRow_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DirectoryItemViewModel file = (DirectoryItemViewModel)DataGrid.SelectedItem;
+            FileAttributeWindow fileAttributeWindow = new FileAttributeWindow(file);
+            fileAttributeWindow.Closing += Refresh;
+            fileAttributeWindow.ShowDialog();
+        }
+
+        private void OpenButton_Click(object sender, RoutedEventArgs e)
+        {
+            DirectoryItemViewModel file = (DirectoryItemViewModel)DataGrid.SelectedItem;
+            TxtWindow txtWindow = new TxtWindow();
+            txtWindow.TextBlock.Text = File.ReadAllText(file.FullPath);
+            txtWindow.ShowDialog();
+        }
+
+        public static long DirSize(DirectoryInfo d)
+        {
+            long size = 0;
+            // Add file sizes.
+            FileInfo[] fis = d.GetFiles();
+            foreach (FileInfo fi in fis)
             {
-                if (file.IsChecked)
+                size += fi.Length;
+            }
+
+            // Add subdirectory sizes.
+            DirectoryInfo[] dis = d.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+            {
+                size += DirSize(di);
+            }
+
+            return size;
+        }
+
+        public static class FileSizeFormatter
+        {
+            // Load all suffixes in an array  
+            static readonly string[] Suffixes =
+                {"Bytes", "KB", "MB", "GB", "TB", "PB"};
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="bytes"></param>
+            /// <returns></returns>
+            public static string FormatSize(long bytes)
+            {
+                int counter = 0;
+                decimal number = bytes;
+                while (Math.Round(number / 1024) >= 1)
                 {
-                    if (file.Extension == ".ENC")
-                    {
-                        _vm._filesToDecrypt.Add(file);
-                    }
+                    number /= 1024;
+                    counter++;
+                }
+
+                return string.Format("{0:n1}{1}", number, Suffixes[counter]);
+            }
+        }
+
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<DirectoryItemViewModel> files =
+                DirectoryStructure.GetCheckedFiles((List<DirectoryItemViewModel>)FileView.ItemsSource);
+            if (files == null || files.Count == 0)
+            {
+                return;
+            }
+            Files.Clear();
+            Files.AddRange(files);
+            CopyButton.IsEnabled = false;
+            MoveButton.IsEnabled = false;
+            PasteButton.IsEnabled = true;
+            PasteButton.Tag = "Copy";
+        }
+
+        private void MoveButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<DirectoryItemViewModel> files =
+                DirectoryStructure.GetCheckedFiles((List<DirectoryItemViewModel>)FileView.ItemsSource);
+            if (files == null || files.Count == 0)
+            {
+                return;
+            }
+            Files.Clear();
+            Files.AddRange(files);
+            CopyButton.IsEnabled = false;
+            MoveButton.IsEnabled = false;
+            PasteButton.IsEnabled = true;
+            PasteButton.Tag = "Move";
+        }
+
+        private void PasteButton_Click(object sender, RoutedEventArgs e)
+        {
+            DirectoryItemViewModel destinationDirectory = (DirectoryItemViewModel)FolderView.SelectedItem;
+            foreach (var file in Files)
+            {
+                try
+                {
+                    File.Copy(file.FullPath, $"{destinationDirectory.FullPath}\\{file.Name}");
+                }
+                catch (Exception)
+                {
                 }
             }
 
-            _vm.DecryptFiles(_vm._filesToDecrypt);
-
-        }
-
-
-        private void ChangeFileAttributesWindow()
-        {
-            AttribPopUp.Visibility = Visibility.Visible;
-            AttribFileName.Text = _vm.CutExtensionFromFileName(_vm._selectedFile.FileName);
-            AttribExtension.Text = _vm._selectedFile.Extension;
-            AttribHidden.IsChecked = _vm._selectedFile.IsHidden;
-        }
-
-
-        private void AttribSaveButton_Click(object sender, RoutedEventArgs e)
-        {
-            _vm._selectedFile.Extension = AttribExtension.Text;
-            if (AttribHidden.IsChecked != null)
+            if (PasteButton.Tag == "Move")
             {
-                _vm._selectedFile.IsHidden = (bool) AttribHidden.IsChecked;
+                foreach (var file in Files)
+                {
+                    File.Delete(file.FullPath);
+                }
             }
 
-            AttribPopUp.Visibility = Visibility.Hidden;
-            _vm.SaveChangedFileData(AttribFileName.Text);
+            Files.Clear();
+            CopyButton.IsEnabled = true;
+            MoveButton.IsEnabled = true;
+            PasteButton.IsEnabled = false;
+            FolderView_MouseDown(null, null);
         }
 
-        /// <summary>
-        /// Saves all the new attributes from the Attribute changer window.
-        /// </summary>
-        /// <param name="newFileName">Provide the new file name for the file.</param>
-        
-
-        private void AttribCloseButton_OnClickCloseButton_Click(object sender, RoutedEventArgs e)
+        private IEnumerable<DirectoryItemViewModel> SearchAccessibleFiles(string root, string searchTerm)
         {
-            _vm._selectedFile = new File();
-            AttribPopUp.Visibility = Visibility.Hidden;
+            var files = new List<DirectoryItemViewModel>();
+
+            foreach (var file in System.IO.Directory.EnumerateFiles(root).Where(m => Regex.IsMatch(m, searchTerm)))
+            {
+                files.Add(new DirectoryItemViewModel(file, DirectoryItemType.File));
+            }
+
+            foreach (var subDir in System.IO.Directory.EnumerateDirectories(root))
+            {
+                try
+                {
+                    files.AddRange(SearchAccessibleFiles(subDir, searchTerm));
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+            }
+
+            return files;
         }
 
-        private void EventSetter_OnHandler(object sender, MouseButtonEventArgs e)
+        private void SearchButton_OnClickButton_Click(object sender, RoutedEventArgs e)
         {
-            _vm._selectedFile = FilesDataGrid.SelectedItem as File;
-            ChangeFileAttributesWindow();
+            DirectoryItemViewModel directory = (DirectoryItemViewModel)FolderView.SelectedItem;
+            IEnumerable<DirectoryItemViewModel> foundFiles = SearchAccessibleFiles(directory.FullPath, SearchText.Text);
+            var directoryItemViewModels = foundFiles as DirectoryItemViewModel[] ?? foundFiles.ToArray();
+            DirectorySize.Content = $"We found {directoryItemViewModels.Count()} files.";
+            DataGrid.ItemsSource = directoryItemViewModels;
         }
 
+        private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox searchText = (TextBox)sender;
+            SearchButton.IsEnabled = searchText.Text.Length >= 3;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            DataGrid = FileView;
+        }
     }
 }

@@ -1,74 +1,85 @@
-﻿<Window x:Name="Form" x:Class="SanityArchiver.DesktopUI.Views.MainWindow"
+﻿<Window x:Class="SanityArchiver.DesktopUI.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:SanityArchiver.DesktopUI.Models"
+        xmlns:local="clr-namespace:SanityArchiver.DesktopUI.Views"
+        xmlns:converters="clr-namespace:SanityArchiver.DesktopUI.Converters"
         mc:Ignorable="d"
-        Title="Sanity Archiver" Height="450" Width="800">
-    <Grid x:Name="MainWindow1" Loaded="Window_Loaded">
-
-
-        <Grid.Resources>
-
-            <HierarchicalDataTemplate DataType="{x:Type models:Directory}" ItemsSource ="{Binding Directories}">
-
-                <TextBlock Text="{Binding Path=Name}" MouseDown="NameCol_mousedown"/>
-
-            </HierarchicalDataTemplate>
-
-        </Grid.Resources>
-
-        <TreeView Margin="10,14,0,9.714" Name="treeView1" HorizontalAlignment="Left" Width="204" RenderTransformOrigin="0.5,0.5" >
-            <TreeView.RenderTransform>
-                <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform AngleY="-0.319"/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="-0.569"/>
-                </TransformGroup>
-            </TreeView.RenderTransform>
-            <TreeViewItem ItemsSource="{Binding Directories}" Header="Choose directory"/>
-        </TreeView>
-        <DataGrid x:Name="FilesDataGrid" AutoGenerateColumns="False" Margin="234,12,10.286,62.714" SelectionMode="Extended">
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <EventSetter Event="MouseDoubleClick" Handler="EventSetter_OnHandler"></EventSetter>
-                </Style>
-            </DataGrid.RowStyle>
-            <DataGrid.Columns>
-                <DataGridCheckBoxColumn x:Name="CheckBox" Header="" Binding="{Binding IsChecked}"/>
-                <DataGridTextColumn IsReadOnly="True" Binding="{Binding FileName}"  Header="Name" Width="200"/>
-                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Created}" Header="Created" Width="200"/>
-                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Size}" Header="Size(kb)" Width="200"/>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <Button x:Name="CompressButton" Content="Compress" HorizontalAlignment="Left" Margin="234,364,0,30.714" Width="75" Click="CompressButton_Click"/>
-
-        <Grid x:Name="AttribPopUp" Visibility="Hidden" Width="300" Height="250" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightCoral">
-            <ListView>
-                <Label>FileName</Label>
-                <TextBox x:Name="AttribFileName">FileName</TextBox>
-                <Label>Extension</Label>
-                <TextBox x:Name="AttribExtension" >Extension</TextBox>
-                <Label>Visibility</Label>
-                <CheckBox x:Name="AttribHidden" >Hidden</CheckBox>
-            </ListView>
-            <Button x:Name="AttribSaveButton" Click="AttribSaveButton_Click" Width="50" Height="50" HorizontalAlignment="Left" Margin="50,0,0,0" VerticalAlignment="Bottom">Save</Button>
-            <Button x:Name="AttribCloseButton" Click="AttribCloseButton_OnClickCloseButton_Click" Width="50" Height="50" HorizontalAlignment="Right" Margin="0,0,50,0" VerticalAlignment="Bottom">Cancel</Button>
+        Title="Sanity Archiver" Height="500" Width="1000" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <TextBox x:Name="SearchText" Margin="10, 10, 0, 0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                     Width="280" Height="20" TextChanged="TextBoxBase_OnTextChanged" />
+            <Button x:Name="SearchButton" Margin="0, 10, 10, 0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Width="20" Height="20"
+                    Content="S"
+                    IsDefault="True" Click="SearchButton_OnClickButton_Click" IsEnabled="False" />
+            <Label Margin="10, 40, 0, 0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="350" Height="20"
+                   Padding="5,0" VerticalContentAlignment="Center" x:Name="DirectorySize" />
+            <TreeView x:Name="FolderView" ItemsSource="{Binding Items}"
+                      SelectedItemChanged="FolderView_MouseDown" Margin="0,70,0,0">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Margin="3"
+                                   Source="{Binding Type, 
+                                        Converter={x:Static converters:HeaderToImageConverter.Instance}}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
         </Grid>
-
-        <Grid x:Name="CompressPopUp" Visibility="Hidden" Width="270" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightCoral">
-            <TextBox x:Name="CompressName" HorizontalAlignment="Center" VerticalAlignment="Top" >NameOfTheZip</TextBox>
-            <Button x:Name="ZipButton" Click="ZipButton_Click" Width="50" Height="50" HorizontalAlignment="Left" Margin="50,0,0,0">Zip</Button>
-            <Button x:Name="CompressCloseButton" Click="CompressCloseButton_Click" Width="50" Height="50" HorizontalAlignment="Right" Margin="0,0,50,0">Cancel</Button>
+        <Grid Grid.Column="1">
+            <DataGrid x:Name="FileView" Grid.Column="1" AutoGenerateColumns="False" CanUserAddRows="false"
+                      Margin="0,0,0,45" SelectionChanged="FileView_SelectionChanged">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <EventSetter Event="MouseDoubleClick" Handler="DataGridRow_DoubleClick" />
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked}" />
+                    <DataGridTextColumn IsReadOnly="True" Header="Filename" Binding="{Binding Name}" />
+                    <DataGridTextColumn IsReadOnly="True" Header="Created Date" Binding="{Binding Created}" />
+                    <DataGridTextColumn IsReadOnly="True" Header="Size" Binding="{Binding Size}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <Grid HorizontalAlignment="Center">
+                <Button Content="Compress" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,10"
+                        Width="75"
+                        Height="25" RenderTransformOrigin="0.5,0.508" Click="CompressButton_Click" />
+                <Button x:Name="EncryptButton" Content="Encrypt" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        Margin="95,0,0,10"
+                        Width="75"
+                        Height="25" Click="EncryptButton_Click" IsEnabled="False" />
+                <Button x:Name="DecryptButton" Click="DecryptButton_Click" Content="Decrypt" HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom" Margin="180,0,0,10"
+                        Width="75"
+                        Height="25" IsEnabled="False" />
+                <Button x:Name="OpenButton" Content="Open" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        Margin="265,0,0,10" Width="75"
+                        Height="25" IsEnabled="False" Click="OpenButton_Click" />
+                <Button x:Name="CopyButton" Content="Copy" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        Margin="350,0,0,10" Width="75"
+                        Height="25" Click="CopyButton_Click" />
+                <Button x:Name="MoveButton" Content="Move" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                        Margin="435,0,0,10" Width="75"
+                        Height="25" Click="MoveButton_Click" />
+                <Button x:Name="PasteButton" Content="Paste" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                        Margin="520,0,10,10" Width="75"
+                        Height="25" IsEnabled="False" Click="PasteButton_Click" Tag="" />
+            </Grid>
         </Grid>
-
-        
-
-        <Button Content="Encrypt" HorizontalAlignment="Left" Margin="314,362,0,0" VerticalAlignment="Top" Width="75" Height="27" Click="Encrypt"/>
-        <Button Content="Decrypt" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="709,362,0,0" Click="DecryptButton_Click"/>
     </Grid>
-
 </Window>
